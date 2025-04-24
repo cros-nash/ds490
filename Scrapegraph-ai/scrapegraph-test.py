@@ -9,8 +9,8 @@ from scrapegraphai.graphs import CodeGeneratorGraph
 # Define the configuration for th`e scraping pipeline
 graph_config = {
     "llm": {
-        "api_key": "api-key",
-        "model": "openai/gpt-4.1-mini",
+        "api_key": os.getenv('OPENAI_API_KEY'),
+        "model": "openai/gpt-4o-mini",
     },
     "verbose": True,
     "headless": False,
@@ -26,24 +26,17 @@ graph_config = {
 }
 
 
-class Table(BaseModel):
-    title: str = Field(description="Label indicating the group of candidates (e.g., Presidential, House, Senate)")
-    party: str = Field(description="Name of the political party (e.g., Dems, Repubs, All)")
-    cycle: str = Field(description="Election year corresponding to the financial data (e.g., 2024, 2022, ... 1990)")
-    cands: str = Field(description="Number of candidates from the given party in the specified election cycle")
-    total_raised: str = Field(description="Total amount of money raised by the party's candidates in this cycle")
-    total_spent: str = Field(description="Total amount of money spent by the party's candidates in this cycle")
-    total_cash: str = Field(description="Total cash on hand at the end of the reporting period for the party's candidates")
-    total_pacs: str = Field(description="Total contributions received from Political Action Committees (PACs) by the party's candidates")
-    total_individuals: str = Field(description="Total contributions received from individual donors by the party's candidates")
-
-class Tables(BaseModel):
-    tables: List[Table]
+class Function(BaseModel):
+    name: str = Field(description="Name of the item")
+    description: str = Field(description="Description of the item")
+    price: int = Field(description="The current price of the item")
+class Functions(BaseModel):
+    functions: List[Function]
 
 code_generator_graph = CodeGeneratorGraph(
-    prompt="Scrape financial summary tables from https://www.opensecrets.org/elections-overview for each election cycle from 1990 to 2024 using the \"Select a Cycle\" dropdown, and return for each cycle the number of candidates, total raised, total spent, total cash on hand, total from PACs, and total from individuals for All, Democrats, and Republicans. Each cycle should be saved in its own JSON file.",
-    source="https://www.opensecrets.org/elections-overview",
-    schema=Tables,
+    prompt="Give me the top 10 computers/laptops from this link",
+    source="https://webscraper.io/test-sites/e-commerce/static/computers/laptops",
+    schema=Functions,
     config=graph_config,
 )
 

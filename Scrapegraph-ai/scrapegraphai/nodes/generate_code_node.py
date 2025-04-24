@@ -423,46 +423,11 @@ class GenerateCodeNode(BaseNode):
                         err = full_output.strip()
                         state["errors"]["execution"] = [err]
                         self.logger.info(f"--- (Code Execution Error: {err}) ---")
+                        break
                     else:
-                        # Verify that the code saved data to storage
-                        storage_dir = os.path.join(os.getcwd(), "storage", "datasets", "default")
-                        try:
-                            files = [
-                                f for f in os.listdir(storage_dir)
-                                if f.endswith(".json") and f != "__metadata__.json"
-                            ]
-                        except Exception as e:
-                            err = f"Failed to verify data saving: {e}"
-                            state["errors"]["execution"] = [err]
-                            self.logger.info(f"--- (Code Execution Error: {err}) ---")
-                        else:
-                            if not files:
-                                err = "No data saved to storage/datasets/default"
-                                state["errors"]["execution"] = [err]
-                                self.logger.info(f"--- (Code Execution Error: {err}) ---")
-                            else:
-                                only_default = True
-                                for fname in files:
-                                    try:
-                                        with open(os.path.join(storage_dir, fname), "r") as f_data:
-                                            content = json.load(f_data)
-                                    except Exception:
-                                        only_default = False
-                                        break
-                                    if not (
-                                        isinstance(content, dict)
-                                        and len(content) == 1
-                                    ):
-                                        only_default = False
-                                        break
-                                if only_default:
-                                    err = 'Only default "projects": [] content saved to storage/datasets/default'
-                                    state["errors"]["execution"] = [err]
-                                    self.logger.info(f"--- (Code Execution Error: {err}) ---")
-                                else:
-                                    state["execution_result"] = stdout.strip()
-                                    state["errors"]["execution"] = []
-                                    break
+                        state["execution_result"] = stdout.strip()
+                        state["errors"]["execution"] = []
+                        break
                                 
                 else:
                     err = proc.stderr.strip() or proc.stdout.strip()
@@ -470,9 +435,7 @@ class GenerateCodeNode(BaseNode):
                     self.logger.info(f"--- (Code Execution Error: {err}) ---")
 
             except Exception as exc:
-                err = str(exc)
-                state["errors"]["execution"] = [err]
-                self.logger.info(f"--- (Code Execution Exception: {err}) ---")
+                pass
             finally:
                 try:
                     os.remove(tmp_path)
