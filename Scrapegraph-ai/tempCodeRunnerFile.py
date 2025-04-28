@@ -1,1 +1,0 @@
-https://perinim.github.io/projects/
