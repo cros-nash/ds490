@@ -1,12 +1,11 @@
 import os
 from typing import List
 
-from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
 from code_generator_graph import CodeGeneratorGraph
 
-# Define the configuration for th`e scraping pipeline
+# Define the configuration for the scraping pipeline
 graph_config = {
     "llm": {
         "api_key": os.getenv('OPENAI_API_KEY'),
@@ -40,7 +39,7 @@ class ItemList(BaseModel):
     items: List[Item]
 
 code_generator_graph = CodeGeneratorGraph(
-    prompt="Scrape and return the complete details (name, description, and price) for every computer and laptop listed on BOTH the first and second pages.",
+    prompt="Scrape and return the complete details (name, description, and price) for every computer and laptop listed on *BOTH* the first and second pages.",
     source="https://webscraper.io/test-sites/e-commerce/static/computers/laptops",
     schema=ItemList,
     config=graph_config,

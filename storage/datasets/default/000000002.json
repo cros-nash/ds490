@@ -1,34 +1,103 @@
 {
-  "items": [
+  "tables": [
     {
-      "name": "Packard 255 G2",
-      "description": "15.6\", AMD E2-3800 1.3GHz, 4GB, 500GB, Windows 8.1",
-      "price": 416.99
+      "title": "Presidential",
+      "party": "All",
+      "cycle": "1992",
+      "cands": "447",
+      "total_raised": "$318,091,402",
+      "total_spent": "$326,726,179",
+      "total_cash": "$41,551,262",
+      "total_pacs": "$59,765,577",
+      "total_individuals": "$194,747,417"
     },
     {
-      "name": "Aspire E1-510",
-      "description": "15.6\", Pentium N3520 2.16GHz, 4GB, 500GB, Linux",
-      "price": 306.99
+      "title": "Presidential",
+      "party": "Dems",
+      "cycle": "1992",
+      "cands": "201",
+      "total_raised": "$183,029,469",
+      "total_spent": "$188,082,505",
+      "total_cash": "$21,546,643",
+      "total_pacs": "$36,258,761",
+      "total_individuals": "$110,894,624"
     },
     {
-      "name": "ThinkPad T540p",
-      "description": "15.6\", Core i5-4200M, 4GB, 500GB, Win7 Pro 64bit",
-      "price": 1178.99
+      "title": "Presidential",
+      "party": "Repubs",
+      "cycle": "1992",
+      "cands": "193",
+      "total_raised": "$133,199,087",
+      "total_spent": "$136,778,616",
+      "total_cash": "$19,984,930",
+      "total_pacs": "$23,498,316",
+      "total_individuals": "$83,119,886"
     },
     {
-      "name": "ProBook",
-      "description": "14\", Core i5 2.6GHz, 4GB, 500GB, Win7 Pro 64bit",
-      "price": 739.99
+      "title": "House",
+      "party": "All",
+      "cycle": "1992",
+      "cands": "2,434",
+      "total_raised": "$401,076,989",
+      "total_spent": "$414,516,840",
+      "total_cash": "$60,051,850",
+      "total_pacs": "$133,107,942",
+      "total_individuals": "$194,611,524"
     },
     {
-      "name": "ThinkPad X240",
-      "description": "12.5\", Core i5-4300U, 8GB, 240GB SSD, Win7 Pro 64bit",
-      "price": 1311.99
+      "title": "House",
+      "party": "Dems",
+      "cycle": "1992",
+      "cands": "1,115",
+      "total_raised": "$220,818,811",
+      "total_spent": "$232,194,280",
+      "total_cash": "$35,509,680",
+      "total_pacs": "$88,409,529",
+      "total_individuals": "$99,766,180"
     },
     {
-      "name": "Aspire E1-572G",
-      "description": "15.6\", Core i5-4200U, 8GB, 1TB, Radeon R7 M265, Windows 8.1",
-      "price": 581.99
+      "title": "House",
+      "party": "Repubs",
+      "cycle": "1992",
+      "cands": "1,157",
+      "total_raised": "$176,464,614",
+      "total_spent": "$178,578,641",
+      "total_cash": "$24,439,461",
+      "total_pacs": "$44,401,332",
+      "total_individuals": "$93,293,339"
+    },
+    {
+      "title": "Senate",
+      "party": "All",
+      "cycle": "1992",
+      "cands": "447",
+      "total_raised": "$318,091,402",
+      "total_spent": "$326,726,179",
+      "total_cash": "$41,551,262",
+      "total_pacs": "$59,765,577",
+      "total_individuals": "$194,747,417"
+    },
+    {
+      "title": "Senate",
+      "party": "Dems",
+      "cycle": "1992",
+      "cands": "201",
+      "total_raised": "$183,029,469",
+      "total_spent": "$188,082,505",
+      "total_cash": "$21,546,643",
+      "total_pacs": "$36,258,761",
+      "total_individuals": "$110,894,624"
+    },
+    {
+      "title": "Senate",
+      "party": "Repubs",
+      "cycle": "1992",
+      "cands": "193",
+      "total_raised": "$133,199,087",
+      "total_spent": "$136,778,616",
+      "total_cash": "$19,984,930",
+      "total_pacs": "$23,498,316",
+      "total_individuals": "$83,119,886"
     }
   ]
 }

@@ -1,34 +1,70 @@
 {
-  "items": [
+  "tables": [
     {
-      "name": "ThinkPad Yoga",
-      "description": "12.5\" Touch, Core i3-4010U, 4GB, 500GB + 16GB SSD Cache,",
-      "price": 1033.99
+      "title": "House",
+      "party": "All",
+      "cycle": "1990",
+      "cands": "1,540",
+      "total_raised": "$280,502,888",
+      "total_spent": "$258,175,250",
+      "total_cash": "$78,304,839",
+      "total_pacs": "$851,781",
+      "total_individuals": "$1,495,195"
     },
     {
-      "name": "Pavilion",
-      "description": "15.6\", Core i5-4200U, 6GB, 750GB, Windows 8.1",
-      "price": 609.99
+      "title": "House",
+      "party": "Dems",
+      "cycle": "1990",
+      "cands": "680",
+      "total_raised": "$160,332,381",
+      "total_spent": "$145,811,167",
+      "total_cash": "$50,609,847",
+      "total_pacs": "$851,781",
+      "total_individuals": "$1,494,741"
     },
     {
-      "name": "Inspiron 15",
-      "description": "Moon Silver, 15.6\", Core i7-4510U, 8GB, 1TB, Radeon HD R7 M265 2GB,",
-      "price": 745.99
+      "title": "House",
+      "party": "Repubs",
+      "cycle": "1990",
+      "cands": "654",
+      "total_raised": "$119,255,770",
+      "total_spent": "$111,456,178",
+      "total_cash": "$27,688,712",
+      "total_pacs": "$0",
+      "total_individuals": "$450"
     },
     {
-      "name": "Dell XPS 13",
-      "description": "13.3\" Touch, Core i5-4210U, 8GB, 128GB SSD, Windows 8.1",
-      "price": 1281.99
+      "title": "Senate",
+      "party": "All",
+      "cycle": "1990",
+      "cands": "175",
+      "total_raised": "$185,392,904",
+      "total_spent": "$178,844,864",
+      "total_cash": "$19,399,838",
+      "total_pacs": "$313,072",
+      "total_individuals": "$6,287,562"
     },
     {
-      "name": "ThinkPad X230",
-      "description": "12.5\", Core i5 2.6GHz, 8GB, 180GB SSD, Win7 Pro 64bit",
-      "price": 1244.99
+      "title": "Senate",
+      "party": "Dems",
+      "cycle": "1990",
+      "cands": "83",
+      "total_raised": "$88,865,787",
+      "total_spent": "$86,249,627",
+      "total_cash": "$10,078,571",
+      "total_pacs": "$313,072",
+      "total_individuals": "$6,286,972"
     },
     {
-      "name": "HP 250 G3",
-      "description": "15.6\", Core i5-4210U, 4GB, 500GB, Windows 8.1",
-      "price": 520.99
+      "title": "Senate",
+      "party": "Repubs",
+      "cycle": "1990",
+      "cands": "66",
+      "total_raised": "$96,353,536",
+      "total_spent": "$92,424,844",
+      "total_cash": "$9,317,870",
+      "total_pacs": "$0",
+      "total_individuals": "$589"
     }
   ]
 }

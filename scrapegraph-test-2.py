@@ -18,7 +18,7 @@ graph_config = {
     "headless": False,
     "reduction": 2,
     "max_iterations": {
-        "overall": 10,
+        "overall": 3,
         "syntax": 3,
         "execution": 3,
         "validation": 3,

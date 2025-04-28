@@ -14,7 +14,7 @@ from scrapegraphai.nodes import (
     PromptRefinerNode,
 )
 
-from generate_code_node import GenerateCodeNode
+from generate_crawlee_code_node import GenerateCodeNode
 
 from scrapegraphai.utils.save_code_to_file import save_code_to_file
 from scrapegraphai.graphs.abstract_graph import AbstractGraph
@@ -176,7 +176,8 @@ class CodeGeneratorGraph(AbstractGraph):
         Returns:
             str: The generated code.
         """
-
+        
+        '''
         inputs = {"user_prompt": self.prompt, self.input_key: self.source}
         self.final_state, self.execution_info = self.graph.execute(inputs)
 
@@ -191,4 +192,76 @@ class CodeGeneratorGraph(AbstractGraph):
 
         save_code_to_file(generated_code, filename)
 
+        return generated_code
+        '''
+        
+        import os, json, hashlib
+        from langchain_core.documents import Document
+
+        # 1) prepare cache directory & key
+        cache_dir = self.config.get("node_cache_dir", ".node_cache")
+        os.makedirs(cache_dir, exist_ok=True)
+        key_source = f"{self.prompt}||{self.source}"
+        cache_key = hashlib.sha256(key_source.encode("utf-8")).hexdigest()
+        cache_file = os.path.join(cache_dir, cache_key + ".json")
+        use_cache = os.path.isfile(cache_file) and not self.config.get("force", False)
+
+        if use_cache:
+            print("CACHE IS BEING USED :)")
+            with open(cache_file, "r") as f:
+                cached = json.load(f)
+            # rehydrate the Document objects
+            original_html = [
+                Document(page_content=d["page_content"], metadata=d["metadata"])
+                for d in cached["original_html"]
+            ]
+            state = {
+                "user_prompt":    self.prompt,
+                self.input_key:   self.source,
+                "original_html":  original_html,
+                "refined_prompt": cached["refined_prompt"],
+                "html_info":      cached["html_info"],
+                "reduced_html":   cached["reduced_html"],
+                "answer":         cached["answer"],
+            }
+
+        else:
+            print("CACHE IS BEING CREATED")
+            state = {"user_prompt": self.prompt, self.input_key: self.source}
+            upstream_nodes = self.graph.nodes[:-1]
+            for node in upstream_nodes:
+                state = node.execute(state)
+
+            # serialize their outputs immediately
+            orig = state.get("original_html", [])
+            serialized = [
+                {"page_content": doc.page_content, "metadata": doc.metadata}
+                for doc in orig
+            ]
+            to_cache = {
+                "original_html":  serialized,
+                "refined_prompt": state.get("refined_prompt"),
+                "html_info":      state.get("html_info"),
+                "reduced_html":   state.get("reduced_html"),
+                "answer":         state.get("answer"),
+            }
+            with open(cache_file, "w") as f:
+                json.dump(to_cache, f)
+
+        # 3) run only GenerateCodeNode
+        gen_node = next(
+            n for n in self.graph.nodes if isinstance(n, GenerateCodeNode)
+        )
+        final_state = gen_node.execute(state)
+
+        # 4) persist generated code as before
+        generated_code = final_state.get("generated_code", "No code created.")
+        if self.config.get("filename") is None:
+            filename = "extracted_data.py"
+        elif ".py" not in self.config.get("filename"):
+            filename = self.config.get("filename") + ".py"
+        else:
+            filename = self.config.get("filename")
+
+        save_code_to_file(generated_code, filename)
         return generated_code

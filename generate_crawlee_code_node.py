@@ -95,6 +95,8 @@ class GenerateCodeNode(BaseNode):
         )
 
         self.output_schema = node_config.get("schema")
+        
+        self.doc_index = None
 
     def execute(self, state: dict) -> dict:
         """
@@ -181,18 +183,17 @@ class GenerateCodeNode(BaseNode):
             if state["errors"]["execution"]:
                 continue
 
-            self.logger.info("--- (Validate the Code Output Schema) ---")
-            state = self.validation_reasoning_loop(state)
-            if state["errors"]["validation"]:
-                continue
+            # self.logger.info("--- (Validate the Code Output Schema) ---")
+            # state = self.validation_reasoning_loop(state)
+            # if state["errors"]["validation"]:
+            #     continue
 
-            self.logger.info(
-                """--- (Checking if the informations
-                             exctrcated are the ones Requested) ---"""
-            )
-            state = self.semantic_comparison_loop(state)
-            if state["errors"]["semantic"]:
-                continue
+            # self.logger.info(
+            #     """--- (Checking if the informations exctrcated are the ones Requested) ---"""
+            # )
+            # state = self.semantic_comparison_loop(state)
+            # if state["errors"]["semantic"]:
+            #     continue
             break
 
         if state["iteration"] == self.max_iterations["overall"] and (
@@ -244,6 +245,8 @@ class GenerateCodeNode(BaseNode):
         """
         for _ in range(self.max_iterations["execution"]):
             code = state["generated_code"]
+            
+            
             
             try:
                 with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False) as tmp:
@@ -341,8 +344,7 @@ class GenerateCodeNode(BaseNode):
 
         for _ in range(self.max_iterations["validation"]):
             validation, errors = self.validate_dict(
-                state["execution_result"],
-                self.output_schema.schema()
+                state["execution_result"], self.output_schema.schema()
             )
             if validation:
                 state["errors"]["validation"] = []
@@ -352,7 +354,22 @@ class GenerateCodeNode(BaseNode):
             self.logger.info(
                 "--- (Code Output not compliant to the desired Output Schema) ---"
             )
-            analysis = validation_focused_analysis(state, self.llm_model)
+
+            analysis_text = validation_focused_analysis(state, self.llm_model)
+
+            if getattr(self, "doc_index", None):
+                query = (
+                    state["initial_analysis"]
+                    + state["html_analysis"]
+                    + " Validation errors: "
+                    + " ".join(errors)
+                )
+                relevant_docs = self.doc_index.similarity_search(query, k=12)
+                crawlee_snippet = "\n\n".join(d.page_content for d in relevant_docs)
+                analysis = f"{crawlee_snippet}\n\n{analysis_text}"
+            else:
+                analysis = analysis_text
+
             self.logger.info(
                 "--- (Regenerating Code to make the Output compliant) ---"
             )
@@ -403,38 +420,34 @@ class GenerateCodeNode(BaseNode):
     def generate_initial_code(self, state: dict) -> str:
         """
         Generates the initial code based on the provided state.
-
-        Args:
-            state (dict): The current state of the reasoning process.
-
-        Returns:
-            str: The initially generated code.
         """
-
-        loader = DirectoryLoader("docs/crawlee", glob="**/*.mdx")
-        docs = loader.load()
-        splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100)
-        chunks = splitter.split_documents(docs)
-        index = FAISS.from_documents(chunks, OpenAIEmbeddings())
+        # ——— build or reuse the documentation index ———
+        if not hasattr(self, "doc_index") or self.doc_index is None:
+            loader = DirectoryLoader("docs/crawlee", glob="**/*.mdx")
+            docs = loader.load()
+            splitter = RecursiveCharacterTextSplitter(
+                chunk_size=800, chunk_overlap=100
+            )
+            chunks = splitter.split_documents(docs)
+            self.doc_index = FAISS.from_documents(chunks, OpenAIEmbeddings())
+        index = self.doc_index
 
         query = state["initial_analysis"] + state["html_analysis"]
         relevant = index.similarity_search(query, k=12)
-        crawlee_snippet = "\n\n".join([d.page_content for d in relevant])
+        crawlee_snippet = "\n\n".join(d.page_content for d in relevant)
 
         prompt = PromptTemplate(
             template=DEFAULT_CRAWLEE_TEMPLATE,
             partial_variables={
-            "user_input": state["user_input"],
-            "json_schema": state["json_schema"],
-            "initial_analysis": state["initial_analysis"],
-            "html_code": state["html_code"],
-            "html_analysis": state["html_analysis"],
-            "crawlee_snippet": crawlee_snippet,
+                "user_input": state["user_input"],
+                "json_schema": state["json_schema"],
+                "initial_analysis": state["initial_analysis"],
+                "html_code": state["html_code"],
+                "html_analysis": state["html_analysis"],
+                "crawlee_snippet": crawlee_snippet,
             },
         )
-
         output_parser = StrOutputParser()
-
         chain = prompt | self.llm_model | output_parser
         generated_code = chain.invoke({})
         return generated_code
