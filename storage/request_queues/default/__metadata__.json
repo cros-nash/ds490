@@ -1,14 +1,14 @@
 {
   "id": "default",
   "name": null,
-  "accessed_at": "2025-04-28 18:14:57.554890+00:00",
-  "created_at": "2025-04-28 18:13:36.499773+00:00",
-  "modified_at": "2025-04-28 18:14:57.554891+00:00",
+  "accessed_at": "2025-04-28 19:54:57.960575+00:00",
+  "created_at": "2025-04-28 19:54:56.803177+00:00",
+  "modified_at": "2025-04-28 19:54:57.960015+00:00",
   "had_multiple_clients": false,
-  "handled_request_count": 13,
-  "pending_request_count": 77,
+  "handled_request_count": 2,
+  "pending_request_count": 0,
   "stats": {},
-  "total_request_count": 90,
+  "total_request_count": 2,
   "user_id": "1",
   "resource_directory": "./storage/request_queues/default"
 }

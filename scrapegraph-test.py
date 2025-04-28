@@ -25,18 +25,24 @@ graph_config = {
     "output_file_name": "extracted_data.py",
 }
 
+class Item(BaseModel):
+    """
+    Represents a single computer or laptop item with its key attributes.
+    """
+    name: str = Field(..., description="The full name/title of the computer or laptop item.")
+    description: str = Field(..., description="A detailed description or specifications of the item.")
+    price: float = Field(..., description="The price of the item in numerical format (e.g., 599.99).")
 
-class Function(BaseModel):
-    name: str = Field(description="Name of the item")
-    description: str = Field(description="Description of the item")
-    price: float = Field(description="The current price of the item")
-class Functions(BaseModel):
-    functions: List[Function]
+class ItemList(BaseModel):
+    """
+    A collection of all computer and laptop items extracted from the website.
+    """
+    items: List[Item]
 
 code_generator_graph = CodeGeneratorGraph(
-    prompt="Give me the details of every computer/laptop on the first and second page",
+    prompt="Scrape and return the complete details (name, description, and price) for every computer and laptop listed on BOTH the first and second pages.",
     source="https://webscraper.io/test-sites/e-commerce/static/computers/laptops",
-    schema=Functions,
+    schema=ItemList,
     config=graph_config,
 )
 

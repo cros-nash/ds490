@@ -28,7 +28,7 @@ other character in the file **unchanged**.
 **HTML Structure Analysis**:
 {html_analysis}
 
-**Crawlee API Reference (Playwright Mode)**:
+**Crawlee documentation reference (generated from langchain similarity_search)**:
 {crawlee_snippet}
 ```
 
@@ -46,14 +46,8 @@ async def main() -> None:
     @crawler.router.default_handler
     async def request_handler(context: PlaywrightCrawlingContext) -> None:
         context.log.info(f'Processing {{context.request.url}}')
-        # {{ WAIT_FOR_CATEGORY_SELECTOR }}
-        # Example: await context.page.wait_for_selector('.product-item > a')
-
-        # {{ ENQUEUE_DETAIL_LINKS }}
-        # Example: await context.enqueue_links(selector='.product-item > a', label='LABEL')
-
-        # {{ PAGINATION_LOGIC }}
-        # Example: await context.enqueue_links(selector='a.pagination__next')
+        
+        # {{ EXPECTED ACTIONS FROM USER REQUEST }}
         
         data = {{ DICTIONARY MATCHING JSON SCHEMA }}
         
@@ -75,7 +69,7 @@ if __name__ == '__main__':
     • produces a dict that exactly matches the JSON schema.
 3. **Do not** reformat or rewrite lines outside the placeholders.
 4. **Return *only* the fully-filled Python file** (no back-ticks, headings, or commentary).
-5. The `max_requests_per_crawl` must always be set to 500
+5. The `max_requests_per_crawl` must always be set to 500.
 
 *If a placeholder is not needed, delete the whole `{{ … }}` token and leave that spot blank.*
 
