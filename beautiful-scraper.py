@@ -117,10 +117,12 @@ def output_results(data, fmt):
         # >>> BEGIN JSON_OUTPUT
         # {{ JSON_OUTPUT_LOGIC }}
         # <<< END JSON_OUTPUT
+        pass
     elif fmt == "csv":
         # >>> BEGIN CSV_OUTPUT
         # {{ CSV_OUTPUT_LOGIC }}
         # <<< END CSV_OUTPUT
+        pass
 
 def main():
     # >>> META_COMMENTS
@@ -131,11 +133,11 @@ def main():
     snippet = """{{ HTML_SNIPPET }}"""
     output_format = "{{ OUTPUT_FORMAT }}"
     # Delay between requests, in seconds
-    delay = #{{ DELAY }}
+    delay = 0 #{{ DELAY }}
     # Max pages to visit
-    max_pages = #{{ MAX_PAGES }}
+    max_pages = 0 #{{ MAX_PAGES }}
     # Request timeout in seconds
-    timeout = #{{ TIMEOUT }}
+    timeout = 0 #{{ TIMEOUT }}
 
     data = scrape_all_pages(url, snippet, delay, max_pages, timeout)
     output_results(data, output_format)
