@@ -417,7 +417,7 @@ class GenerateCodeNode(BaseNode):
         chunks = splitter.split_documents(docs)
         index = FAISS.from_documents(chunks, OpenAIEmbeddings())
 
-        query = state["user_input"]
+        query = state["initial_analysis"] + state["html_analysis"]
         relevant = index.similarity_search(query, k=12)
         crawlee_snippet = "\n\n".join([d.page_content for d in relevant])
 

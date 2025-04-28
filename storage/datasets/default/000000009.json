@@ -1,19 +1,5 @@
 {
-  "functions": [
-    {
-      "name": "Pavilion",
-      "description": "15.6\", Core i5-4200U, 6GB, 750GB, Windows 8.1",
-      "price": 60999
-    },
-    {
-      "name": "Aspire E1-572G",
-      "description": "15.6\", Core i5-4200U, 8GB, 1TB, Radeon R7 M265, Windows 8.1",
-      "price": 58199
-    },
-    {
-      "name": "Galaxy Note 10...",
-      "description": "10.1\", 32GB, Black",
-      "price": 58799
-    }
-  ]
+  "name": "\n\t\t\t\t\t\tInspiron 15\n\t\t\t\t\t",
+  "description": "Moon Silver, 15.6\", Core i7-4510U, 8GB, 1TB, Radeon HD R7 M265 2GB,",
+  "price": 745.99
 }

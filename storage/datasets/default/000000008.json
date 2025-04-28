@@ -1,19 +1,5 @@
 {
-  "functions": [
-    {
-      "name": "ThinkPad X230",
-      "description": "12.5\", Core i5 2.6GHz, 8GB, 180GB SSD, Win7 Pro 64bit",
-      "price": 124499
-    },
-    {
-      "name": "Dell Latitude...",
-      "description": "Dell Latitude 5480, 14\" FHD, Core i7-7600U, 8GB, 256GB SSD, Linux",
-      "price": 123836
-    },
-    {
-      "name": "Dell Latitude...",
-      "description": "Dell Latitude 5480, 14\" FHD, Core i5-7300U, 8GB, 500GB, Linux + Windows 10 Home",
-      "price": 111014
-    }
-  ]
+  "name": "\n\t\t\t\t\t\tPavilion\n\t\t\t\t\t",
+  "description": "15.6\", Core i5-4200U, 6GB, 750GB, Windows 8.1",
+  "price": 609.99
 }

@@ -1,19 +1,5 @@
 {
-  "functions": [
-    {
-      "name": "IdeaTab A8-50",
-      "description": "Blue, 8\" IPS, Quad-Core 1.3GHz, 16GB, Android 4.2",
-      "price": 12199
-    },
-    {
-      "name": "Galaxy Note",
-      "description": "10.1\", 3G, Android 4.0, Garnet Red",
-      "price": 39999
-    },
-    {
-      "name": "Apple iPad Air",
-      "description": "Wi-Fi, 64GB, Silver",
-      "price": 60399
-    }
-  ]
+  "name": "\n\t\t\t\t\t\tLenovo V110-15...\n\t\t\t\t\t",
+  "description": "Asus VivoBook 15 X540NA-GQ008T Chocolate Black, 15.6\" HD, Pentium N4200, 4GB, 500GB, Windows 10 Home, En kbd",
+  "price": 356.49
 }

@@ -1,34 +1,5 @@
 {
-  "functions": [
-    {
-      "name": "Dell Inspiron...",
-      "description": "Dell Inspiron 15 (5567) Fog Gray, 15.6\" FHD, Core i5-7200U, 8GB, 1TB, Radeon R7 M445 4GB, Linux",
-      "price": 67900
-    },
-    {
-      "name": "Asus VivoBook...",
-      "description": "Asus VivoBook S14 (S406UA-BV041T) Starry Grey, 14\", Core i5-8250U, 8GB, 256GB SSD, Windows 10 Home, Eng kbd",
-      "price": 72900
-    },
-    {
-      "name": "Asus ROG STRIX...",
-      "description": "Asus ROG STRIX GL553VD-DM256, 15.6\" FHD, Core i5-7300HQ, 8GB, 1TB, GeForce GTX 1050 2GB, No OS",
-      "price": 79900
-    },
-    {
-      "name": "Acer Nitro 5 A...",
-      "description": "Acer Nitro 5 AN515-51, 15.6\" FHD IPS, Core i5-7300HQ, 8GB, 1TB, GeForce GTX 1050 2GB, Windows 10 Home",
-      "price": 80900
-    },
-    {
-      "name": "Asus ROG STRIX...",
-      "description": "Asus ROG STRIX GL553VD-DM256, 15.6\" FHD, Core i5-7300HQ, 8GB, 1TB, GeForce GTX 1050 2GB, No OS + Windows 10 Home",
-      "price": 89900
-    },
-    {
-      "name": "Lenovo ThinkPa...",
-      "description": "Lenovo ThinkPad L570, 15.6\" FHD, Core i7-7500U, 8GB, 256GB SSD, Windows 10 Pro",
-      "price": 99900
-    }
-  ]
+  "name": "\n\t\t\t\t\t\tHP 350 G1\n\t\t\t\t\t",
+  "description": "15.6\", Core i5-4200U, 4GB, 750GB, Radeon HD8670M 2GB, Windows",
+  "price": 577.99
 }

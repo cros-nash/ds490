@@ -1,19 +1,5 @@
 {
-  "functions": [
-    {
-      "name": "Nokia X",
-      "description": "Andoid, Jolla dualboot",
-      "price": 10999
-    },
-    {
-      "name": "Iphone",
-      "description": "White",
-      "price": 89999
-    },
-    {
-      "name": "Iphone",
-      "description": "Silver",
-      "price": 89999
-    }
-  ]
+  "name": "\n\t\t\t\t\t\tThinkPad X230\n\t\t\t\t\t",
+  "description": "12.5\", Core i5 2.6GHz, 8GB, 180GB SSD, Win7 Pro 64bit",
+  "price": 1244.99
 }

@@ -1,8 +1,8 @@
 {
   "id": "Y9UhK1bEvAwVr9I",
   "unique_key": "https://webscraper.io/test-sites/e-commerce/static/product/90",
-  "order_no": null,
-  "handled_at": "2025-04-28 18:06:42.286780+00:00",
+  "order_no": "1745864050069.512000",
+  "handled_at": null,
   "request": {
     "url": "https://webscraper.io/test-sites/e-commerce/static/product/90",
     "method": "GET",
@@ -10,15 +10,14 @@
     "payload": null,
     "user_data": {
       "__crawlee": {
-        "state": 3,
         "crawlDepth": 2
       },
-      "label": "detail_links"
+      "label": "DETAIL"
     },
     "retry_count": 0,
     "no_retry": false,
-    "loaded_url": "https://webscraper.io/test-sites/e-commerce/static/product/90",
-    "handled_at": "2025-04-28 18:06:42.286780+00:00",
+    "loaded_url": null,
+    "handled_at": null,
     "unique_key": "https://webscraper.io/test-sites/e-commerce/static/product/90",
     "id": "Y9UhK1bEvAwVr9I"
   }

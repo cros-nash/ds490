@@ -1,9 +1,5 @@
 {
-  "functions": [
-    {
-      "name": "ThinkPad T540p",
-      "description": "15.6\", Core i5-4200M, 4GB, 500GB, Win7 Pro 64bit",
-      "price": 117899
-    }
-  ]
+  "name": "\n\t\t\t\t\t\tProBook\n\t\t\t\t\t",
+  "description": "14\", Core i5 2.6GHz, 4GB, 500GB, Win7 Pro 64bit",
+  "price": 739.99
 }

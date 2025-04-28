@@ -1,7 +1,7 @@
 {
   "id": "ASPVOUoweyCBzdG",
   "unique_key": "https://webscraper.io/test-sites/e-commerce/static/computers/laptops?page=14",
-  "order_no": "1745863562843.216000",
+  "order_no": "1745864050314.340000",
   "handled_at": null,
   "request": {
     "url": "https://webscraper.io/test-sites/e-commerce/static/computers/laptops?page=14",
@@ -12,7 +12,7 @@
       "__crawlee": {
         "crawlDepth": 2
       },
-      "label": "detail_links"
+      "label": "PAGINATION"
     },
     "retry_count": 0,
     "no_retry": false,

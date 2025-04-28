@@ -29,12 +29,12 @@ graph_config = {
 class Function(BaseModel):
     name: str = Field(description="Name of the item")
     description: str = Field(description="Description of the item")
-    price: int = Field(description="The current price of the item")
+    price: float = Field(description="The current price of the item")
 class Functions(BaseModel):
     functions: List[Function]
 
 code_generator_graph = CodeGeneratorGraph(
-    prompt="Give me the top 10 computers/laptops in the entire website based on content from the first and second page.",
+    prompt="Give me the details of every computer/laptop on the first and second page",
     source="https://webscraper.io/test-sites/e-commerce/static/computers/laptops",
     schema=Functions,
     config=graph_config,

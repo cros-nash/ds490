@@ -1,7 +1,7 @@
 {
   "id": "8xVlM6FUkNNfnOJ",
   "unique_key": "https://webscraper.io/test-sites/e-commerce/static/product/147",
-  "order_no": "1745863563026.204000",
+  "order_no": "1745864050527.420000",
   "handled_at": null,
   "request": {
     "url": "https://webscraper.io/test-sites/e-commerce/static/product/147",
@@ -12,7 +12,7 @@
       "__crawlee": {
         "crawlDepth": 2
       },
-      "label": "detail_links"
+      "label": "DETAIL"
     },
     "retry_count": 0,
     "no_retry": false,

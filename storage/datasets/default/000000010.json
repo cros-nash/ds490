@@ -1,34 +1,5 @@
 {
-  "functions": [
-    {
-      "name": "Lenovo IdeaTab",
-      "description": "7\" screen, Android",
-      "price": 6998
-    },
-    {
-      "name": "Acer Iconia",
-      "description": "7\" screen, Android, 16GB",
-      "price": 9699
-    },
-    {
-      "name": "Asus MeMO Pad",
-      "description": "7\" screen, Android, 8GB",
-      "price": 10299
-    },
-    {
-      "name": "Amazon Kindle",
-      "description": "6\" screen, wifi",
-      "price": 10399
-    },
-    {
-      "name": "iPad Mini Reti...",
-      "description": "Wi-Fi + Cellular, 32GB, Silver",
-      "price": 53799
-    },
-    {
-      "name": "IdeaTab A3500L",
-      "description": "Black, 7\" IPS, Quad-Core 1.2GHz, 8GB, Android 4.2",
-      "price": 8899
-    }
-  ]
+  "name": "\n\t\t\t\t\t\tDell XPS 13\n\t\t\t\t\t",
+  "description": "13.3\" Touch, Core i5-4210U, 8GB, 128GB SSD, Windows 8.1",
+  "price": 1281.99
 }

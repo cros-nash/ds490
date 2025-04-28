@@ -2,7 +2,7 @@
   "id": "4PUNeMLhnOILEbI",
   "unique_key": "https://webscraper.io/test-sites/e-commerce/static/computers/laptops?page=7",
   "order_no": null,
-  "handled_at": "2025-04-28 18:06:01.701229+00:00",
+  "handled_at": "2025-04-28 18:14:09.359544+00:00",
   "request": {
     "url": "https://webscraper.io/test-sites/e-commerce/static/computers/laptops?page=7",
     "method": "GET",
@@ -13,12 +13,12 @@
         "state": 3,
         "crawlDepth": 1
       },
-      "label": "detail_links"
+      "label": "PAGINATION"
     },
     "retry_count": 0,
     "no_retry": false,
     "loaded_url": "https://webscraper.io/test-sites/e-commerce/static/computers/laptops?page=7",
-    "handled_at": "2025-04-28 18:06:01.701229+00:00",
+    "handled_at": "2025-04-28 18:14:09.359544+00:00",
     "unique_key": "https://webscraper.io/test-sites/e-commerce/static/computers/laptops?page=7",
     "id": "4PUNeMLhnOILEbI"
   }

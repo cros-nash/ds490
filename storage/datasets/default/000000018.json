@@ -1,34 +1,5 @@
 {
-  "functions": [
-    {
-      "name": "Acer Aspire 3...",
-      "description": "Acer Aspire 3 A315-31 Black, 15.6\" HD, Pentium N4200 1.1GHz, 4GB, 128GB SSD, Windows 10 Home",
-      "price": 40898
-    },
-    {
-      "name": "Lenovo V110-15...",
-      "description": "Lenovo V110-15ISK, 15.6\" HD, Core i3-6006U, 8GB, 128GB SSD, Windows 10 Home",
-      "price": 40963
-    },
-    {
-      "name": "Acer Aspire ES...",
-      "description": "Acer Aspire ES1-732 Black, 17.3\" HD+, Celeron, N3350, 4GB, 1TB, Windows 10 Home",
-      "price": 41046
-    },
-    {
-      "name": "Asus VivoBook...",
-      "description": "Asus VivoBook 15 X540NA-GQ026T Chocolate Black, 15.6\" HD, Pentium N4200, 4GB, 128GB SSD, Windows 10 Home, En/Ru kbd",
-      "price": 41066
-    },
-    {
-      "name": "Asus EeeBook R...",
-      "description": "Asus EeeBook R416NA-FA014T, 14\" FHD, Pentium N4200, 4GB, 128GB eMMC, Windows 10 Home, Eng kbd",
-      "price": 43330
-    },
-    {
-      "name": "Acer Aspire 3...",
-      "description": "Acer Aspire 3 A315-51, 15.6\" HD, Core i3-6006U, 4GB, 1TB, Windows 10 Home",
-      "price": 43629
-    }
-  ]
+  "name": "\n\t\t\t\t\t\tAcer Aspire A5...\n\t\t\t\t\t",
+  "description": "Acer Aspire A515-51-5654, Black, 15.6\", FHD, Core i5-8250U, 8GB DDR4, 256GB SSD, Windows 10 Home, ENG",
+  "price": 679.0
 }
