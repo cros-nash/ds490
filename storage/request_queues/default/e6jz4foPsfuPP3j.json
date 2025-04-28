@@ -1,0 +1,25 @@
+{
+  "id": "e6jz4foPsfuPP3j",
+  "unique_key": "https://webscraper.io/test-sites/e-commerce/static/computers/tablets",
+  "order_no": null,
+  "handled_at": "2025-04-28 18:05:59.671930+00:00",
+  "request": {
+    "url": "https://webscraper.io/test-sites/e-commerce/static/computers/tablets",
+    "method": "GET",
+    "headers": {},
+    "payload": null,
+    "user_data": {
+      "__crawlee": {
+        "state": 3,
+        "crawlDepth": 1
+      },
+      "label": "detail_links"
+    },
+    "retry_count": 0,
+    "no_retry": false,
+    "loaded_url": "https://webscraper.io/test-sites/e-commerce/static/computers/tablets",
+    "handled_at": "2025-04-28 18:05:59.671930+00:00",
+    "unique_key": "https://webscraper.io/test-sites/e-commerce/static/computers/tablets",
+    "id": "e6jz4foPsfuPP3j"
+  }
+}

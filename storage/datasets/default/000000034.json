@@ -1,0 +1,19 @@
+{
+  "functions": [
+    {
+      "name": "IdeaTab A8-50",
+      "description": "Blue, 8\" IPS, Quad-Core 1.3GHz, 16GB, Android 4.2",
+      "price": 12199
+    },
+    {
+      "name": "Galaxy Note",
+      "description": "10.1\", 3G, Android 4.0, Garnet Red",
+      "price": 39999
+    },
+    {
+      "name": "Apple iPad Air",
+      "description": "Wi-Fi, 64GB, Silver",
+      "price": 60399
+    }
+  ]
+}

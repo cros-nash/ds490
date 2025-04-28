@@ -1,0 +1,25 @@
+{
+  "id": "dYZiebwttwUldeA",
+  "unique_key": "https://webscraper.io/downloads/web_scraper_media_kit.zip",
+  "order_no": "1745863576860.557000",
+  "handled_at": null,
+  "request": {
+    "url": "https://webscraper.io/downloads/Web_Scraper_Media_Kit.zip",
+    "method": "GET",
+    "headers": {},
+    "payload": null,
+    "user_data": {
+      "__crawlee": {
+        "state": 5,
+        "crawlDepth": 1
+      },
+      "label": "detail_links"
+    },
+    "retry_count": 1,
+    "no_retry": false,
+    "loaded_url": null,
+    "handled_at": null,
+    "unique_key": "https://webscraper.io/downloads/web_scraper_media_kit.zip",
+    "id": "dYZiebwttwUldeA"
+  }
+}

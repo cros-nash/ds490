@@ -1,0 +1,19 @@
+{
+  "functions": [
+    {
+      "name": "Toshiba Porteg...",
+      "description": "Toshiba Portege X20W-D-10V Black/Blue, 12.5\" FHD Touch, Core i7-7500U, 8GB, 512GB SSD, Windows 10 Pro",
+      "price": 136632
+    },
+    {
+      "name": "Asus ASUSPRO B...",
+      "description": "Asus ASUSPRO B9440UA-GV0279R Gray, 14\" FHD, Core i7-7500U, 16GB, 512GB SSD, Windows 10 Pro, Eng kbd",
+      "price": 138113
+    },
+    {
+      "name": "Asus ROG Strix...",
+      "description": "Asus ROG Strix GL702VM-GC146T, 17.3\" FHD, Core i7-7700HQ, 8GB, 1TB + 128GB SSD, GeForce GTX 1060 3GB, Windows 10 Home, Eng kbd",
+      "price": 139900
+    }
+  ]
+}

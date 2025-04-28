@@ -1,0 +1,34 @@
+{
+  "functions": [
+    {
+      "name": "Acer Aspire 3...",
+      "description": "Acer Aspire 3 A315-51 Black, 15.6\" FHD, Core i3-7100U, 4GB, 500GB + 128GB SSD, Windows 10 Home",
+      "price": 49471
+    },
+    {
+      "name": "Dell Vostro 15...",
+      "description": "Dell Vostro 15 (3568) Red, 15.6\" HD, Core i5-7200U, 4GB, 1TB, Radeon R5 M420 2GB, Linux",
+      "price": 49717
+    },
+    {
+      "name": "Lenovo V510 Bl...",
+      "description": "Lenovo V510 Black, 15.6\" FHD, Core i3-7100U, 4GB, 128GB SSD, Windows 10 Pro",
+      "price": 49823
+    },
+    {
+      "name": "Lenovo ThinkPa...",
+      "description": "Lenovo ThinkPad L460, 14\" FHD IPS, Core i7-6600U, 8GB, 256GB SSD, Windows 10 Pro",
+      "price": 109602
+    },
+    {
+      "name": "Dell Inspiron...",
+      "description": "Dell Inspiron 15 (7567) Black, 15.6\" FHD, Core i5-7300HQ, 8GB, 256GB SSD, GeForce GTX 1050 4GB, Windows 10 Home",
+      "price": 109842
+    },
+    {
+      "name": "MSI GL72M 7RDX",
+      "description": "MSI GL72M 7RDX, 17.3\" FHD, Core i5-7300HQ, 8GB, 1TB + 128GB SSD, GeForce GTX 1050 2GB, Windows 10 Home",
+      "price": 109900
+    }
+  ]
+}

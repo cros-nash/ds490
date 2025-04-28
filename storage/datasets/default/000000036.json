@@ -1,0 +1,34 @@
+{
+  "functions": [
+    {
+      "name": "Galaxy Tab 3",
+      "description": "7\", 8GB, Wi-Fi, Android 4.2, Yellow",
+      "price": 10799
+    },
+    {
+      "name": "Memo Pad HD 7",
+      "description": "IPS, Dual-Core 1.2GHz, 8GB, Android 4.3",
+      "price": 10199
+    },
+    {
+      "name": "Galaxy Note 10...",
+      "description": "10.1\", 32GB, Black",
+      "price": 58799
+    },
+    {
+      "name": "MeMo PAD FHD 1...",
+      "description": "White, 10.1\" IPS, 1.6GHz, 2GB, 16GB, Android 4.2",
+      "price": 32099
+    },
+    {
+      "name": "IdeaTab S5000",
+      "description": "Silver, 7\" IPS, Quad-Core 1.2Ghz, 16GB, 3G, Android 4.2",
+      "price": 17299
+    },
+    {
+      "name": "Iconia B1-730H...",
+      "description": "Black, 7\", 1.6GHz Dual-Core, 8GB, Android 4.4",
+      "price": 9999
+    }
+  ]
+}

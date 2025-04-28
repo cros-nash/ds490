@@ -1,0 +1,34 @@
+{
+  "functions": [
+    {
+      "name": "Dell Latitude...",
+      "description": "Dell Latitude 5580, 15.6\" FHD, Core i7-7600U, 8GB, 256GB SSD, GeForce GT930MX, Windows 10 Pro",
+      "price": 133728
+    },
+    {
+      "name": "Dell Latitude...",
+      "description": "Dell Latitude 5480, 14\" FHD, Core i7-7600U, 8GB, 256GB SSD, Linux + Windows 10 Home",
+      "price": 133837
+    },
+    {
+      "name": "Dell Latitude...",
+      "description": "Dell Latitude 5580, 15.6\" FHD, Core i7-7600U, 16GB, 256GB SSD, GeForce GT930MX, Linux",
+      "price": 134122
+    },
+    {
+      "name": "Apple MacBook...",
+      "description": "Apple MacBook Air 13\", Intel Core i5 1.8GHz, 8GB, 256GB SSD, Intel HD 6000, RUS",
+      "price": 134778
+    },
+    {
+      "name": "Lenovo ThinkPa...",
+      "description": "Lenovo ThinkPad T470, 14\" FHD IPS, Core i5-7200U, 8GB, 256GB SSD, Windows 10 Pro",
+      "price": 134923
+    },
+    {
+      "name": "Lenovo ThinkPa...",
+      "description": "Lenovo ThinkPad Yoga 370 Black, 13.3\" FHD IPS Touch, Core i5-7200U, 8GB, 256GB SSD, 4G, Windows 10 Pro",
+      "price": 136224
+    }
+  ]
+}

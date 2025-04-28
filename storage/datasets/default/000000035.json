@@ -1,0 +1,34 @@
+{
+  "functions": [
+    {
+      "name": "Galaxy Tab",
+      "description": "16GB, White",
+      "price": 25199
+    },
+    {
+      "name": "IdeaTab A3500-...",
+      "description": "Blue, 7\" IPS, Quad-Core 1.3GHz, 8GB, 3G, Android 4.2",
+      "price": 14899
+    },
+    {
+      "name": "Galaxy Tab 3",
+      "description": "7\", 8GB, Wi-Fi, Android 4.2, White",
+      "price": 9799
+    },
+    {
+      "name": "Galaxy Note",
+      "description": "12.2\", 32GB, WiFi, Android 4.4, White",
+      "price": 48999
+    },
+    {
+      "name": "MeMO Pad 7",
+      "description": "White, 7\", Atom 1.2GHz, 8GB, Android 4.4",
+      "price": 13099
+    },
+    {
+      "name": "Galaxy Tab 4",
+      "description": "LTE (SM-T235), Quad-Core 1.2GHz, 8GB, Black",
+      "price": 23399
+    }
+  ]
+}

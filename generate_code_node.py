@@ -17,6 +17,11 @@ from langchain.prompts import PromptTemplate
 from langchain_community.chat_models import ChatOllama
 from langchain_core.output_parsers import StrOutputParser
 
+from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import DirectoryLoader
+
 from scrapegraphai.prompts import TEMPLATE_SEMANTIC_COMPARISON
 from crawlee_prompt import DEFAULT_CRAWLEE_TEMPLATE
 from scrapegraphai.utils import (
@@ -176,19 +181,19 @@ class GenerateCodeNode(BaseNode):
             if state["errors"]["execution"]:
                 continue
 
-            self.logger.info("--- (Validate the Code Output Schema) ---")
-            state = self.validation_reasoning_loop(state)
-            if state["errors"]["validation"]:
-                continue
+            # self.logger.info("--- (Validate the Code Output Schema) ---")
+            # state = self.validation_reasoning_loop(state)
+            # if state["errors"]["validation"]:
+            #     continue
 
-            self.logger.info(
-                """--- (Checking if the informations
-                             exctrcated are the ones Requested) ---"""
-            )
-            state = self.semantic_comparison_loop(state)
-            if state["errors"]["semantic"]:
-                continue
-            break
+            # self.logger.info(
+            #     """--- (Checking if the informations
+            #                  exctrcated are the ones Requested) ---"""
+            # )
+            # state = self.semantic_comparison_loop(state)
+            # if state["errors"]["semantic"]:
+            #     continue
+            # break
 
         if state["iteration"] == self.max_iterations["overall"] and (
             state["errors"]["syntax"]
@@ -239,12 +244,12 @@ class GenerateCodeNode(BaseNode):
         """
         for _ in range(self.max_iterations["execution"]):
             code = state["generated_code"]
-
-            with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False) as tmp:
-                tmp.write(code)
-                tmp_path = tmp.name
-
+            
             try:
+                with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False) as tmp:
+                    tmp.write(code)
+                    tmp_path = tmp.name
+
                 proc = subprocess.Popen(
                     [sys.executable, tmp_path],
                     stdout=subprocess.PIPE,
@@ -253,44 +258,51 @@ class GenerateCodeNode(BaseNode):
                     bufsize=1
                 )
 
-                output_lines = []
                 try:
+                    output_lines = []
                     for line in proc.stdout:
+                        print(line, end="")
                         output_lines.append(line)
-                        print(line, end="")  # Optionally keep this if live feedback is desired
+                    
                     proc.wait(timeout=60)
+
                 except subprocess.TimeoutExpired:
                     proc.kill()
                     state["errors"]["execution"] = ["Execution timed out."]
                     self.logger.info("--- (Code Execution Error: Execution timed out) ---")
                     continue
 
-                full_output = "".join(output_lines)
+                full_output = ''.join(output_lines)
 
                 if proc.returncode == 0:
-                    state["execution_result"] = full_output.strip()
-                    state["errors"]["execution"] = []
-                    break  # Successful execution, exit the loop
+                    if "ERROR" in full_output:
+                        err = full_output.strip()
+                        state["errors"]["execution"] = [err]
+                        self.logger.info(f"--- (Code Execution Error: {err}) ---")
+                    else:
+                        state["execution_result"] = full_output.strip()
+                        state["errors"]["execution"] = []
+                        return state  # SUCCESS, exit early
                 else:
-                    state["errors"]["execution"] = [
-                        f"Script failed with return code {proc.returncode}. Output:\n{full_output.strip()}"
-                    ]
-                    self.logger.info(f"--- (Code Execution Error: {full_output.strip()}) ---")
+                    err = full_output.strip()
+                    state["errors"]["execution"] = [err]
+                    self.logger.info(f"--- (Code Execution Error: {err}) ---")
 
             except Exception as exc:
-                state["errors"]["execution"] = [f"Unexpected error: {str(exc)}"]
-                self.logger.info(f"--- (Execution Exception: {str(exc)}) ---")
+                err = str(exc)
+                state["errors"]["execution"] = [err]
+                self.logger.info(f"--- (Code Execution Exception: {err}) ---")
+
             finally:
                 try:
                     os.remove(tmp_path)
-                except OSError:
+                except Exception:
                     pass
 
+            # If execution failed, regenerate the code
             analysis = execution_focused_analysis(state, self.llm_model)
             self.logger.info("--- (Regenerating Code to fix the Error) ---")
-            state["generated_code"] = execution_focused_code_generation(
-                state, analysis, self.llm_model
-            )
+            state["generated_code"] = execution_focused_code_generation(state, analysis, self.llm_model)
             state["generated_code"] = extract_code(state["generated_code"])
 
         return state
@@ -398,14 +410,26 @@ class GenerateCodeNode(BaseNode):
         Returns:
             str: The initially generated code.
         """
+
+        loader = DirectoryLoader("docs/crawlee", glob="**/*.mdx")
+        docs = loader.load()
+        splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100)
+        chunks = splitter.split_documents(docs)
+        index = FAISS.from_documents(chunks, OpenAIEmbeddings())
+
+        query = state["user_input"]
+        relevant = index.similarity_search(query, k=12)
+        crawlee_snippet = "\n\n".join([d.page_content for d in relevant])
+
         prompt = PromptTemplate(
             template=DEFAULT_CRAWLEE_TEMPLATE,
             partial_variables={
-                "user_input": state["user_input"],
-                "json_schema": state["json_schema"],
-                "initial_analysis": state["initial_analysis"],
-                "html_code": state["html_code"],
-                "html_analysis": state["html_analysis"],
+            "user_input": state["user_input"],
+            "json_schema": state["json_schema"],
+            "initial_analysis": state["initial_analysis"],
+            "html_code": state["html_code"],
+            "html_analysis": state["html_analysis"],
+            "crawlee_snippet": crawlee_snippet,
             },
         )
 

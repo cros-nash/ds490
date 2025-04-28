@@ -34,7 +34,7 @@ class Functions(BaseModel):
     functions: List[Function]
 
 code_generator_graph = CodeGeneratorGraph(
-    prompt="Give me the top 10 computers/laptops from this link",
+    prompt="Give me the top 10 computers/laptops in the entire website based on content from the first and second page.",
     source="https://webscraper.io/test-sites/e-commerce/static/computers/laptops",
     schema=Functions,
     config=graph_config,

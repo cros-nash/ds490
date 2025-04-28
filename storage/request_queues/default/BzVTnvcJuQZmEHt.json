@@ -1,0 +1,25 @@
+{
+  "id": "BzVTnvcJuQZmEHt",
+  "unique_key": "https://webscraper.io/privacy-policy",
+  "order_no": "1745863596924.556000",
+  "handled_at": null,
+  "request": {
+    "url": "https://webscraper.io/privacy-policy",
+    "method": "GET",
+    "headers": {},
+    "payload": null,
+    "user_data": {
+      "__crawlee": {
+        "state": 5,
+        "crawlDepth": 1
+      },
+      "label": "detail_links"
+    },
+    "retry_count": 1,
+    "no_retry": false,
+    "loaded_url": "https://webscraper.io/privacy-policy",
+    "handled_at": null,
+    "unique_key": "https://webscraper.io/privacy-policy",
+    "id": "BzVTnvcJuQZmEHt"
+  }
+}

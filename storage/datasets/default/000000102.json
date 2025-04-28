@@ -1,0 +1,34 @@
+{
+  "functions": [
+    {
+      "name": "Hewlett Packar...",
+      "description": "Hewlett Packard Spectre 13-v106na Dark Ash Silver, 13.3\" FHD IPS, Core i5-7200U, 8GB, 256GB SSD, Windows 10 Home",
+      "price": 127310
+    },
+    {
+      "name": "Toshiba Porteg...",
+      "description": "Toshiba Portege Z30-C-16K Grey, 13.3\" FHD, Core i5-6200U, 8GB, 256GB SSD, 4G, Windows 10 Pro",
+      "price": 129474
+    },
+    {
+      "name": "MSI GL62VR 7RF...",
+      "description": "MSI GL62VR 7RFX, 15.6\" FHD, Core i7-7700HQ, 8GB, 1TB + 256GB SSD, GeForce GTX 1060 3GB, Windows 10 Home",
+      "price": 129900
+    },
+    {
+      "name": "Dell Latitude...",
+      "description": "Dell Latitude 5480, 14\" FHD, Core i7-7600U, 8GB, 256GB SSD, Windows 10 Pro",
+      "price": 131039
+    },
+    {
+      "name": "Hewlett Packar...",
+      "description": "Hewlett Packard ProBook 640 G3, 14\" FHD, Core i7-7600U, 8GB, 256GB SSD, Windows 10 Pro",
+      "price": 132683
+    },
+    {
+      "name": "Apple MacBook...",
+      "description": "Apple MacBook Pro 13\" Space Gray, Core i5 2.3GHz, 8GB, 128GB SSD, Iris Plus 640, ENG",
+      "price": 133300
+    }
+  ]
+}

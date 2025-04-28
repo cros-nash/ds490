@@ -1,0 +1,34 @@
+{
+  "functions": [
+    {
+      "name": "Acer Aspire A3...",
+      "description": "Acer Aspire A315-31-C33J Black 15.6\", HD, Celeron N3350, 4GB DDR3L, 128GB, Windows 10 Home, ENG",
+      "price": 37994
+    },
+    {
+      "name": "Acer Aspire ES...",
+      "description": "Acer Aspire ES1-572 Black, 15.6\" HD, Core i3-6006U, 4GB, 128GB SSD, Linux",
+      "price": 37995
+    },
+    {
+      "name": "Acer Aspire 3...",
+      "description": "Acer Aspire 3 A315-31 Black, 15.6\" HD, Pentium N4200 1.1GHz, 4GB, 128GB SSD, Windows 10 Home",
+      "price": 39148
+    },
+    {
+      "name": "Acer Aspire 3...",
+      "description": "Acer Aspire 3 A315-21, 15.6\", AMD A4-9120. 4GB. 128GB SSD, Linux",
+      "price": 39388
+    },
+    {
+      "name": "Asus VivoBook...",
+      "description": "Asus VivoBook E502NA-GO022T Dark Blue, 15.6\" HD, Pentium N4200 1.1GHz, 4GB, 128GB SSD, Windows 10 Home, En/Ru kbd",
+      "price": 39999
+    },
+    {
+      "name": "Lenovo ThinkPa...",
+      "description": "Lenovo ThinkPad E31-80, 13.3\" HD, Celeron 3855U 1.6GHz, 4GB, 128GB SSD, Windows 10 Home",
+      "price": 40423
+    }
+  ]
+}
