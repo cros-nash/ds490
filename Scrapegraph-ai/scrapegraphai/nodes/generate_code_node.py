@@ -118,10 +118,19 @@ async def main() -> None:
         # Example: await context.enqueue_links(selector='.product-item > a', label='LABEL')
 
         # {{ PAGINATION_LOGIC }}
-        # Example:
-        # next_button = await context.page.query_selector('a.pagination__next')
-        # if next_button:
-        #     await context.enqueue_links(selector='a.pagination__next', label='LABEL')
+        # Pattern 1: Click "Next" button (e.g. JS-based button)
+        next_button = await context.page.query_selector('button.next')
+        if next_button:
+            await next_button.click()
+            await context.page.wait_for_timeout(1000)  # wait for page to load
+
+        # Pattern 2: Classic link-based pagination
+        await context.enqueue_links(selector='a.pagination__next', label='DETAIL')
+
+        # Pattern 3: Infinite scroll (optional fallback)
+        # for _ in range(3):
+        #     await context.page.mouse.wheel(0, 10000)
+        #     await context.page.wait_for_timeout(1500)
         
         data = {{ DICTIONARY MATCHING JSON SCHEMA }}
         
@@ -388,7 +397,6 @@ class GenerateCodeNode(BaseNode):
         """
         Executes the execution reasoning loop to ensure the generated code runs without errors.
         """
-
         for _ in range(self.max_iterations["execution"]):
             code = state["generated_code"]
 
@@ -404,10 +412,12 @@ class GenerateCodeNode(BaseNode):
                     text=True,
                     bufsize=1
                 )
-                
+
+                output_lines = []
                 try:
                     for line in proc.stdout:
-                        print(line, end="")
+                        output_lines.append(line)
+                        print(line, end="")  # Optionally keep this if live feedback is desired
                     proc.wait(timeout=60)
                 except subprocess.TimeoutExpired:
                     proc.kill()
@@ -415,27 +425,21 @@ class GenerateCodeNode(BaseNode):
                     self.logger.info("--- (Code Execution Error: Execution timed out) ---")
                     continue
 
+                full_output = "".join(output_lines)
+
                 if proc.returncode == 0:
-                    stdout = proc.stdout or ""
-                    stderr = proc.stderr or ""
-                    full_output = f"{stdout}\n{stderr}"
-                    if "ERROR" in full_output:
-                        err = full_output.strip()
-                        state["errors"]["execution"] = [err]
-                        self.logger.info(f"--- (Code Execution Error: {err}) ---")
-                        break
-                    else:
-                        state["execution_result"] = stdout.strip()
-                        state["errors"]["execution"] = []
-                        break
-                                
+                    state["execution_result"] = full_output.strip()
+                    state["errors"]["execution"] = []
+                    break  # Successful execution, exit the loop
                 else:
-                    err = proc.stderr.strip() or proc.stdout.strip()
-                    state["errors"]["execution"] = [err]
-                    self.logger.info(f"--- (Code Execution Error: {err}) ---")
+                    state["errors"]["execution"] = [
+                        f"Script failed with return code {proc.returncode}. Output:\n{full_output.strip()}"
+                    ]
+                    self.logger.info(f"--- (Code Execution Error: {full_output.strip()}) ---")
 
             except Exception as exc:
-                pass
+                state["errors"]["execution"] = [f"Unexpected error: {str(exc)}"]
+                self.logger.info(f"--- (Execution Exception: {str(exc)}) ---")
             finally:
                 try:
                     os.remove(tmp_path)
@@ -450,6 +454,7 @@ class GenerateCodeNode(BaseNode):
             state["generated_code"] = extract_code(state["generated_code"])
 
         return state
+
 
     def validation_reasoning_loop(self, state: dict) -> dict:
         """

@@ -1,0 +1,23 @@
+{
+  "id": "tHevbSWYNiz82oQ",
+  "unique_key": "https://webscraper.io/test-sites/e-commerce/static/computers/laptops",
+  "order_no": null,
+  "handled_at": "2025-04-25 15:59:55.980173+00:00",
+  "request": {
+    "url": "https://webscraper.io/test-sites/e-commerce/static/computers/laptops",
+    "method": "GET",
+    "headers": {},
+    "payload": null,
+    "user_data": {
+      "__crawlee": {
+        "state": 3
+      }
+    },
+    "retry_count": 0,
+    "no_retry": false,
+    "loaded_url": "https://webscraper.io/test-sites/e-commerce/static/computers/laptops",
+    "handled_at": "2025-04-25 15:59:55.980173+00:00",
+    "unique_key": "https://webscraper.io/test-sites/e-commerce/static/computers/laptops",
+    "id": "tHevbSWYNiz82oQ"
+  }
+}

@@ -1,38 +1,45 @@
-from crawlee.crawlers import PlaywrightCrawlingContext
-from crawlee.router import Router
+import asyncio
 
-router = Router[PlaywrightCrawlingContext]()
+from crawlee.crawlers import PlaywrightCrawler, PlaywrightCrawlingContext
 
-@router.default_handler
-async def default_handler(context: PlaywrightCrawlingContext) -> None:
-    context.log.info(f'default_handler is processing {context.request.url}')
+async def main() -> None:
+    crawler = PlaywrightCrawler(
+        max_requests_per_crawl=100,
+    )
 
-    await context.wait_for_selector('.projects')
+    @crawler.router.default_handler
+    async def request_handler(context: PlaywrightCrawlingContext) -> None:
+        context.log.info(f'Processing {context.request.url}')
+        await context.page.wait_for_selector('.col-md-4.col-xl-4.col-lg-4')
 
-    await context.enqueue_links(selector='a.dropdown-item', label='CATEGORY')
+        await context.enqueue_links(selector='.col-md-4.col-xl-4.col-lg-4 a.title', label='DETAIL')
 
-@router.handler('CATEGORY')
-async def category_handler(context: PlaywrightCrawlingContext) -> None:
-    context.log.info(f'category_handler is processing {context.request.url}')
+        next_button = await context.page.query_selector('button.next')
+        if next_button:
+            await next_button.click()
+            await context.page.wait_for_timeout(1000)
 
-    await context.wait_for_selector('.projects')
+        data = []
+        products = await context.page.query_selector_all('.col-md-4.col-xl-4.col-lg-4')
+        for product in products:
+            name = await product.query_selector('h4 a.title')
+            name = await name.inner_text() if name else ""
+            description = await product.query_selector('p.description.card-text')
+            description = await description.inner_text() if description else ""
+            price = await product.query_selector('h4.price float-end.card-title span')
+            price = int(float(await price.inner_text().replace('$', '').strip())) if price else 0
+            
+            data.append({
+                'name': name,
+                'description': description,
+                'price': price
+            })
+        
+        await context.push_data({'functions': data})
+        
+    await crawler.run(['https://webscraper.io/test-sites/e-commerce/static/computers/laptops'])
 
-    await context.enqueue_links(selector='a.grid-item > div.card.hoverable', label='DETAIL')
 
-    # No pagination logic needed
-
-@router.handler('DETAIL')
-async def detail_handler(context: PlaywrightCrawlingContext) -> None:
-    context.log.info(f'detail_handler is processing {context.request.url}')
-
-    data = {'projects': []}
-
-    project_title = await context.selector('h4.card-title').text()
-    project_description = await context.selector('p.card-text').text()
-    data['projects'].append({
-        'title': {'type': 'string', 'description': project_title},
-        'description': {'type': 'string', 'description': project_description},
-    })
-
-    await context.push_data(data)
+if __name__ == '__main__':
+    asyncio.run(main())
 
