@@ -1,70 +1,804 @@
 {
-  "tables": [
+  "events": [
     {
-      "title": "House",
-      "party": "All",
-      "cycle": "1990",
-      "cands": "1,540",
-      "total_raised": "$280,502,888",
-      "total_spent": "$258,175,250",
-      "total_cash": "$78,304,839",
-      "total_pacs": "$851,781",
-      "total_individuals": "$1,495,195"
+      "title": "Web Summit Rio",
+      "date": "Apr 27-30",
+      "location": "Rio De Janeiro, Brazil"
     },
     {
-      "title": "House",
-      "party": "Dems",
-      "cycle": "1990",
-      "cands": "680",
-      "total_raised": "$160,332,381",
-      "total_spent": "$145,811,167",
-      "total_cash": "$50,609,847",
-      "total_pacs": "$851,781",
-      "total_individuals": "$1,494,741"
+      "title": "Earnings: NXPI",
+      "date": "Apr 28",
+      "location": ""
     },
     {
-      "title": "House",
-      "party": "Repubs",
-      "cycle": "1990",
-      "cands": "654",
-      "total_raised": "$119,255,770",
-      "total_spent": "$111,456,178",
-      "total_cash": "$27,688,712",
-      "total_pacs": "$0",
-      "total_individuals": "$450"
+      "title": "Financing the AI Revolution",
+      "date": "Apr 28",
+      "location": "New York"
     },
     {
-      "title": "Senate",
-      "party": "All",
-      "cycle": "1990",
-      "cands": "175",
-      "total_raised": "$185,392,904",
-      "total_spent": "$178,844,864",
-      "total_cash": "$19,399,838",
-      "total_pacs": "$313,072",
-      "total_individuals": "$6,287,562"
+      "title": "Reuters Momentum AI",
+      "date": "Apr 28-29",
+      "location": "New York"
     },
     {
-      "title": "Senate",
-      "party": "Dems",
-      "cycle": "1990",
-      "cands": "83",
-      "total_raised": "$88,865,787",
-      "total_spent": "$86,249,627",
-      "total_cash": "$10,078,571",
-      "total_pacs": "$313,072",
-      "total_individuals": "$6,286,972"
+      "title": "RSA Conference",
+      "date": "Apr 28-May 1",
+      "location": "San Francisco"
     },
     {
-      "title": "Senate",
-      "party": "Repubs",
-      "cycle": "1990",
-      "cands": "66",
-      "total_raised": "$96,353,536",
-      "total_spent": "$92,424,844",
-      "total_cash": "$9,317,870",
-      "total_pacs": "$0",
-      "total_individuals": "$589"
+      "title": "Earnings: SNAP, PYPL, SPOT, BKNG",
+      "date": "Apr 29",
+      "location": ""
+    },
+    {
+      "title": "LlamaCon",
+      "date": "Apr 29",
+      "location": ""
+    },
+    {
+      "title": "Intel Foundry Direct Connect",
+      "date": "Apr 29",
+      "location": "San Jose"
+    },
+    {
+      "title": "Startup Grind Global Conference",
+      "date": "Apr 29-30",
+      "location": "Silicon Valley, CA"
+    },
+    {
+      "title": "Generative AI Summit Silicon Valley",
+      "date": "Apr 29-30",
+      "location": "Santa Clara, CA"
+    },
+    {
+      "title": "Running Remote",
+      "date": "Apr 29-30",
+      "location": "Austin, TX"
+    },
+    {
+      "title": "Visa’s Global Product Drop EventREGISTER FOR LIVESTREAM",
+      "date": "Apr 30",
+      "location": "San Francisco"
+    },
+    {
+      "title": "Earnings: META, MSFT, QCOM, HOOD, Samsung Electronics, EBAY",
+      "date": "Apr 30",
+      "location": ""
+    },
+    {
+      "title": "TOKEN2049",
+      "date": "Apr 30-May 1",
+      "location": "Dubai"
+    },
+    {
+      "title": "TiECon",
+      "date": "Apr 30-May 2",
+      "location": "Santa Clara, CA"
+    },
+    {
+      "title": "Earnings: AAPL, AMZN, ABNB, TWLO, RDDT, XYZ, CART, RBLX, ROKU",
+      "date": "May 1",
+      "location": ""
+    },
+    {
+      "title": "Milken Insitute Global Conference",
+      "date": "May 4-7",
+      "location": "Los Angeles"
+    },
+    {
+      "title": "Earnings: PLTR",
+      "date": "May 5",
+      "location": ""
+    },
+    {
+      "title": "EmTech AI",
+      "date": "May 5-7",
+      "location": "Cambridge, MA"
+    },
+    {
+      "title": "IBM Think",
+      "date": "May 5-8",
+      "location": "Boston"
+    },
+    {
+      "title": "Earnings: AMD, GFS, EA",
+      "date": "May 6",
+      "location": ""
+    },
+    {
+      "title": "OMR Festival",
+      "date": "May 6-7",
+      "location": "Hamburg"
+    },
+    {
+      "title": "FT Digital Assets Summit",
+      "date": "May 6-7",
+      "location": "London"
+    },
+    {
+      "title": "Fortune Brainstorm AI",
+      "date": "May 6-7",
+      "location": "London"
+    },
+    {
+      "title": "Stripe Sessions",
+      "date": "May 6-8",
+      "location": "San Francisco"
+    },
+    {
+      "title": "HYBRID:Config",
+      "date": "May 6-8",
+      "location": "San Francisco"
+    },
+    {
+      "title": "European Identity and Cloud Conference",
+      "date": "May 6-9",
+      "location": "Berlin"
+    },
+    {
+      "title": "Earnings: DASH, UBER, APP, U",
+      "date": "May 7",
+      "location": ""
+    },
+    {
+      "title": "Sana AI Summit",
+      "date": "May 7",
+      "location": "Stockholm"
+    },
+    {
+      "title": "Turing Fest",
+      "date": "May 7-8",
+      "location": "Edinburgh"
+    },
+    {
+      "title": "HYBRID:Data Innovation Summit",
+      "date": "May 7-8",
+      "location": "Stockholm"
+    },
+    {
+      "title": "FinovateSpring",
+      "date": "May 7-9",
+      "location": "San Diego"
+    },
+    {
+      "title": "Nutanix .NEXT",
+      "date": "May 7-9",
+      "location": "Washington, DC"
+    },
+    {
+      "title": "Earnings: COIN, LYFT, PINS, SHOP, NTDOY, NET, AFRM, MTCH, TOST, SMIC",
+      "date": "May 8",
+      "location": ""
+    },
+    {
+      "title": "ETHDam",
+      "date": "May 9-11",
+      "location": "Amsterdam"
+    },
+    {
+      "title": "Dubai FinTech Summit",
+      "date": "May 12-13",
+      "location": "Dubai"
+    },
+    {
+      "title": "Code Remix Summit",
+      "date": "May 12-14",
+      "location": "Miami"
+    },
+    {
+      "title": "Automate",
+      "date": "May 12-15",
+      "location": "Detroit"
+    },
+    {
+      "title": "JCON Europe",
+      "date": "May 12-15",
+      "location": "Cologne"
+    },
+    {
+      "title": "SaaStock USA",
+      "date": "May 13-14",
+      "location": "Austin, TX"
+    },
+    {
+      "title": "SaaStr Annual",
+      "date": "May 13-15",
+      "location": "San Francisco"
+    },
+    {
+      "title": "ODSC East",
+      "date": "May 13-15",
+      "location": "Boston"
+    },
+    {
+      "title": "J.P. Morgan Global Technology, Media and Communications Conference",
+      "date": "May 13-15",
+      "location": "Boston"
+    },
+    {
+      "title": "Zoholics USA",
+      "date": "May 13-15",
+      "location": "Houston"
+    },
+    {
+      "title": "Earnings: Tencent, SONY",
+      "date": "May 14",
+      "location": ""
+    },
+    {
+      "title": "Twilio SIGNAL",
+      "date": "May 14-15",
+      "location": "San Francisco"
+    },
+    {
+      "title": "HODL",
+      "date": "May 14-15",
+      "location": "Dubai"
+    },
+    {
+      "title": "CoinDesk Consensus",
+      "date": "May 14-16",
+      "location": "Toronto"
+    },
+    {
+      "title": "J On the Beach",
+      "date": "May 14-16",
+      "location": "Malaga, Spain"
+    },
+    {
+      "title": "Jensen Huang Keynote at COMPUTEX",
+      "date": "May 19",
+      "location": "Taipei"
+    },
+    {
+      "title": "GamesBeat Summit",
+      "date": "May 19-20",
+      "location": "Los Angeles"
+    },
+    {
+      "title": "MIT Sloan CIO Symposium",
+      "date": "May 19-20",
+      "location": "Cambridge, MA"
+    },
+    {
+      "title": "Fortune Workplace Innovation Summit",
+      "date": "May 19-20",
+      "location": "Dana Point, CA"
+    },
+    {
+      "title": "SAP Sapphire & ASUG Annual Conference",
+      "date": "May 19-21",
+      "location": "Orlando, FL"
+    },
+    {
+      "title": "Microsoft Build",
+      "date": "May 19-22",
+      "location": "Seattle"
+    },
+    {
+      "title": "Dell Technologies World",
+      "date": "May 19-22",
+      "location": "Las Vegas"
+    },
+    {
+      "title": "Red Hat Summit",
+      "date": "May 19-22",
+      "location": "Boston"
+    },
+    {
+      "title": "NDC Oslo",
+      "date": "May 19-23",
+      "location": "Oslo"
+    },
+    {
+      "title": "Solana Accelerate",
+      "date": "May 19-23",
+      "location": "New York"
+    },
+    {
+      "title": "Breaking The Bank",
+      "date": "May 20",
+      "location": "San Francisco"
+    },
+    {
+      "title": "Google I/OREGISTER NOW",
+      "date": "May 20-21",
+      "location": "Mountain View, CA"
+    },
+    {
+      "title": "Network X Americas",
+      "date": "May 20-22",
+      "location": "Dallas"
+    },
+    {
+      "title": "Embedded Vision Summit",
+      "date": "May 20-22",
+      "location": "Santa Clara, CA"
+    },
+    {
+      "title": "MAU Vegas",
+      "date": "May 20-22",
+      "location": "Las Vegas"
+    },
+    {
+      "title": "Seamless Middle East",
+      "date": "May 20-22",
+      "location": "Dubai"
+    },
+    {
+      "title": "COMPUTEX",
+      "date": "May 20-23",
+      "location": "Taipei"
+    },
+    {
+      "title": "HYBRID:DevOps Pro Europe",
+      "date": "May 20-23",
+      "location": "Vilnius, Lithuania"
+    },
+    {
+      "title": "Dreamhack Dallas",
+      "date": "May 23-25",
+      "location": "Dallas"
+    },
+    {
+      "title": "Earnings: ARM",
+      "date": "May 25",
+      "location": ""
+    },
+    {
+      "title": "InfoShare",
+      "date": "May 27-28",
+      "location": "Gdansk, Poland"
+    },
+    {
+      "title": "Bitcoin 2025",
+      "date": "May 27-29",
+      "location": "Las Vegas"
+    },
+    {
+      "title": "Web Summit Vancouver",
+      "date": "May 27-30",
+      "location": "Vancouver"
+    },
+    {
+      "title": "CyCon",
+      "date": "May 27-30",
+      "location": "Tallinn, Estonia"
+    },
+    {
+      "title": "WSJ The Future of Everything Festival",
+      "date": "May 28-29",
+      "location": "New York"
+    },
+    {
+      "title": "Dublin Tech Summit",
+      "date": "May 28-29",
+      "location": "Dublin"
+    },
+    {
+      "title": "Gainsight Pulse",
+      "date": "May 28-29",
+      "location": "Las Vegas"
+    },
+    {
+      "title": "ONUG AI Networking Summit",
+      "date": "May 28-29",
+      "location": "Dallas"
+    },
+    {
+      "title": "AI DevSummit",
+      "date": "May 28-29",
+      "location": "South San Francisco"
+    },
+    {
+      "title": "Craft",
+      "date": "May 29-30",
+      "location": "Budapest"
+    },
+    {
+      "title": "North American Information Security Summit",
+      "date": "Jun 1-3",
+      "location": "Austin, TX"
+    },
+    {
+      "title": "Digital Banking",
+      "date": "Jun 1-4",
+      "location": "Boca Raton, FL"
+    },
+    {
+      "title": "AI+ Expo",
+      "date": "Jun 2-4",
+      "location": "Washington, DC"
+    },
+    {
+      "title": "Space Tech Expo USA",
+      "date": "Jun 2-4",
+      "location": "Long Beach, CA"
+    },
+    {
+      "title": "Snowflake Summit",
+      "date": "Jun 2-5",
+      "location": "San Francisco"
+    },
+    {
+      "title": "Siemens Realize LIVE Americas",
+      "date": "Jun 2-5",
+      "location": "Detroit"
+    },
+    {
+      "title": "FinOps X",
+      "date": "Jun 2-5",
+      "location": "San Diego"
+    },
+    {
+      "title": "SXSW London",
+      "date": "Jun 2-7",
+      "location": "London"
+    },
+    {
+      "title": "Gartner Application Innovation & Business Solutions Summit",
+      "date": "Jun 3-5",
+      "location": "Las Vegas"
+    },
+    {
+      "title": "Infosecurity Europe",
+      "date": "Jun 3-5",
+      "location": "London"
+    },
+    {
+      "title": "Money20/20 Europe",
+      "date": "Jun 3-5",
+      "location": "Amsterdam"
+    },
+    {
+      "title": "Identiverse",
+      "date": "Jun 3-6",
+      "location": "Las Vegas"
+    },
+    {
+      "title": "Bloomberg Tech",
+      "date": "Jun 4-5",
+      "location": "San Francisco"
+    },
+    {
+      "title": "TechEx North America",
+      "date": "Jun 4-5",
+      "location": "Santa Clara, CA"
+    },
+    {
+      "title": "Women in Tech Summit",
+      "date": "Jun 4-5",
+      "location": "Warsaw"
+    },
+    {
+      "title": "We Make Future",
+      "date": "Jun 4-6",
+      "location": "Bologna, Italy"
+    },
+    {
+      "title": "TC Sessions: AI",
+      "date": "Jun 5",
+      "location": "Berkeley, CA"
+    },
+    {
+      "title": "InfoComm",
+      "date": "Jun 7-13",
+      "location": "San Jose"
+    },
+    {
+      "title": "HYBRID:Cisco Live",
+      "date": "Jun 8-12",
+      "location": "San Diego"
+    },
+    {
+      "title": "AI Con USA",
+      "date": "Jun 8-13",
+      "location": "Seattle"
+    },
+    {
+      "title": "Gartner Security & Risk Management Summit",
+      "date": "Jun 9-11",
+      "location": "National Harbor, MD"
+    },
+    {
+      "title": "HYBRID:Databricks Data + AI Summit",
+      "date": "Jun 9-12",
+      "location": "San Francisco"
+    },
+    {
+      "title": "HYBRID:WWDC",
+      "date": "Jun 9-13",
+      "location": "Cupertino, CA"
+    },
+    {
+      "title": "London Tech Week",
+      "date": "Jun 9-13",
+      "location": "London"
+    },
+    {
+      "title": "DASH by Datadog",
+      "date": "Jun 10-11",
+      "location": "New York"
+    },
+    {
+      "title": "Augmented World Expo USA",
+      "date": "Jun 10-12",
+      "location": "Long Beach, CA"
+    },
+    {
+      "title": "Info~Tech LIVE",
+      "date": "Jun 10-12",
+      "location": "Las Vegas"
+    },
+    {
+      "title": "ISC High Performance",
+      "date": "Jun 10-13",
+      "location": "Hamburg"
+    },
+    {
+      "title": "VIRTUAL:Y Combinator Summer Demo Day",
+      "date": "Jun 11",
+      "location": ""
+    },
+    {
+      "title": "AI Summit London",
+      "date": "Jun 11-12",
+      "location": "London"
+    },
+    {
+      "title": "RenderATL",
+      "date": "Jun 11-13",
+      "location": "Atlanta"
+    },
+    {
+      "title": "Viva Technology",
+      "date": "Jun 11-14",
+      "location": "Paris"
+    },
+    {
+      "title": "CVPR",
+      "date": "Jun 11-15",
+      "location": "Nashville, TN"
+    },
+    {
+      "title": "AMD Advancing AI 2025 media event",
+      "date": "Jun 12",
+      "location": "Santa Clara"
+    },
+    {
+      "title": "Berlin Buzzwords",
+      "date": "Jun 15-17",
+      "location": "Berlin"
+    },
+    {
+      "title": "VIRTUAL:JSNation",
+      "date": "Jun 16",
+      "location": ""
+    },
+    {
+      "title": "LDX3",
+      "date": "Jun 16-17",
+      "location": "London"
+    },
+    {
+      "title": "HLTH Europe",
+      "date": "Jun 16-19",
+      "location": "Amsterdam"
+    },
+    {
+      "title": "Cannes Lions",
+      "date": "Jun 16-20",
+      "location": "Cannes"
+    },
+    {
+      "title": "Confidential Computing Summit",
+      "date": "Jun 17-18",
+      "location": "San Francisco"
+    },
+    {
+      "title": "Banking Transformation Summit London",
+      "date": "Jun 18-19",
+      "location": "London"
+    },
+    {
+      "title": "MWC Shanghai",
+      "date": "Jun 18-20",
+      "location": "Shanghai"
+    },
+    {
+      "title": "TNW Conference",
+      "date": "Jun 19-20",
+      "location": "Amsterdam"
+    },
+    {
+      "title": "VidCon Anaheim",
+      "date": "Jun 19-21",
+      "location": "Anaheim"
+    },
+    {
+      "title": "FIRST Conference",
+      "date": "Jun 20-27",
+      "location": "Copenhagen"
+    },
+    {
+      "title": "Design Automation Conference",
+      "date": "Jun 22-25",
+      "location": "San Francisco"
+    },
+    {
+      "title": "Linux Open Source Summit North America",
+      "date": "Jun 23-25",
+      "location": "Denver"
+    },
+    {
+      "title": "HPE Discover",
+      "date": "Jun 23-26",
+      "location": "Las Vegas"
+    },
+    {
+      "title": "VentureBeat Transform",
+      "date": "Jun 24-25",
+      "location": "San Francisco"
+    },
+    {
+      "title": "Cerebral Valley London",
+      "date": "Jun 25",
+      "location": "London"
+    },
+    {
+      "title": "Techsylvania",
+      "date": "Jun 25-26",
+      "location": "Cluj-Napoca, Romania"
+    },
+    {
+      "title": "Droidcon New York",
+      "date": "Jun 25-26",
+      "location": "New York"
+    },
+    {
+      "title": "Linix Security Summit North America",
+      "date": "Jun 26-27",
+      "location": "Denver"
+    },
+    {
+      "title": "RAISE Summit",
+      "date": "Jul 8-9",
+      "location": "Paris"
+    },
+    {
+      "title": "WeAreDevelopers World Congress",
+      "date": "Jul 9-11",
+      "location": "Berlin"
+    },
+    {
+      "title": "Reuters Momentum AI",
+      "date": "Jul 15-16",
+      "location": "San Jose"
+    },
+    {
+      "title": "Black Hat USA",
+      "date": "Aug 2-7",
+      "location": "Las Vegas"
+    },
+    {
+      "title": "DEF CON",
+      "date": "Aug 7-10",
+      "location": "Las Vegas"
+    },
+    {
+      "title": "Ai4",
+      "date": "Aug 11-13",
+      "location": "Las Vegas"
+    },
+    {
+      "title": "USENIX Security Symposium",
+      "date": "Aug 13-15",
+      "location": "Seattle"
+    },
+    {
+      "title": "Kansas City Developer Conference",
+      "date": "Aug 14-16",
+      "location": "Kansas City"
+    },
+    {
+      "title": "HYBRID:gamescom",
+      "date": "Aug 19-24",
+      "location": "Cologne"
+    },
+    {
+      "title": "Burning Man",
+      "date": "Aug 24-Sep 1",
+      "location": "Black Rock City, Nevada"
+    },
+    {
+      "title": "VMware Explore",
+      "date": "Aug 25-28",
+      "location": "Las Vegas"
+    },
+    {
+      "title": "GopherCon",
+      "date": "Aug 26-28",
+      "location": "New York"
+    },
+    {
+      "title": "PAX West",
+      "date": "Aug 29-Sep 1",
+      "location": "Seattle"
+    },
+    {
+      "title": "Commercial UAV Expo",
+      "date": "Sep 2-4",
+      "location": "Las Vegas"
+    },
+    {
+      "title": "HubSpot INBOUND",
+      "date": "Sep 3-5",
+      "location": "San Francisco"
+    },
+    {
+      "title": "IFA",
+      "date": "Sep 5-7",
+      "location": "Berlin"
+    },
+    {
+      "title": "Fortune Brainstorm Tech",
+      "date": "Sep 8-10",
+      "location": "Park City, UT"
+    },
+    {
+      "title": "AI Infra Summit",
+      "date": "Sep 9-11",
+      "location": "Santa Clara"
+    },
+    {
+      "title": "Identity Week America",
+      "date": "Sep 10-11",
+      "location": "Washington, DC"
+    },
+    {
+      "title": "ONA",
+      "date": "Sep 10-13",
+      "location": "New Orleans"
+    },
+    {
+      "title": "Fast Company Innovation Festival",
+      "date": "Sep 15-16",
+      "location": "New York"
+    },
+    {
+      "title": "CrowdStrike Fal.con",
+      "date": "Sep 15-18",
+      "location": "Las Vegas"
+    },
+    {
+      "title": "HYBRID:Workday Rising",
+      "date": "Sep 15-18",
+      "location": "San Francisco"
+    },
+    {
+      "title": "Skift Global Forum",
+      "date": "Sep 15-18",
+      "location": "New York"
+    },
+    {
+      "title": "Meta Connect",
+      "date": "Sep 17-18",
+      "location": ""
+    },
+    {
+      "title": "DMEXCO",
+      "date": "Sep 17-18",
+      "location": "Cologne"
+    },
+    {
+      "title": "eCommerce Expo + Technology for Marketing",
+      "date": "Sep 24-25",
+      "location": "London"
+    },
+    {
+      "title": "Bits & Pretzels Founders Festival",
+      "date": "Sep 29-Oct 1",
+      "location": "Munich"
     }
   ]
 }

@@ -1,6 +1,7 @@
 import asyncio
 
 from crawlee.crawlers import PlaywrightCrawler, PlaywrightCrawlingContext
+from bs4 import BeautifulSoup
 
 async def main() -> None:
     crawler = PlaywrightCrawler(
@@ -11,31 +12,21 @@ async def main() -> None:
     async def request_handler(context: PlaywrightCrawlingContext) -> None:
         context.log.info(f'Processing {context.request.url}')
         
-        product_elements = await context.page.query_selector_all('div.col-md-4.col-xl-4.col-lg-4')
-        items = []
-
-        for product_element in product_elements:
-            name = await product_element.query_selector('h4 > a.title')
-            name_text = await name.inner_text() if name else ''
-
-            description = await product_element.query_selector('p.description.card-text')
-            description_text = await description.inner_text() if description else ''
-
-            price = await product_element.query_selector('h4.price > span')
-            price_text = await price.inner_text() if price else ''
-            price_value = float(price_text.replace('$', '').replace(',', '')) if price_text else 0.0
-
-            items.append({
-                'name': name_text,
-                'description': description_text,
-                'price': price_value
-            })
-
-        data = {'items': items}
+        page = await context.page.content()
+        soup = BeautifulSoup(page, 'html.parser')
+        
+        events = []
+        for event in soup.select('.rhov'):
+            date = event.select_one('div:nth-child(1)').get_text(strip=True)
+            title = event.select_one('div:nth-child(2)').get_text(strip=True)
+            location = event.select_one('div:nth-child(3)').get_text(strip=True)
+            events.append({'title': title, 'date': date, 'location': location})
+        
+        data = {'events': events}
         
         await context.push_data(data)
         
-    await crawler.run(['https://webscraper.io/test-sites/e-commerce/static/computers/laptops?page=1', 'https://webscraper.io/test-sites/e-commerce/static/computers/laptops?page=2'])
+    await crawler.run(['http://www.techmeme.com/events'])
 
 
 if __name__ == '__main__':
