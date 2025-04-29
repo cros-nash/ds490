@@ -1,3 +1,16 @@
+"""To run:
+
+python3 create_container.py test_containerization.py
+
+Later we'll plug in our generated script instead of test_containerization.py.
+
+Outputs:
+- requirements.txt: Lists all dependencies
+- Containerfile: Instructions for building the container
+
+This will also build the container image.
+"""
+
 import argparse
 import sys
 import os
@@ -9,20 +22,7 @@ import pkg_resources
 
 
 class Containerizer:
-    IMPORT_TO_PACKAGE_MAP = {
-        'bs4': 'beautifulsoup4',
-        'PIL': 'pillow',
-        'sklearn': 'scikit-learn',
-        'cv2': 'opencv-python',
-        'yaml': 'pyyaml',
-        'wx': 'wxpython',
-        'psycopg2': 'psycopg2-binary',
-        'dateutil': 'python-dateutil',
-        'skimage': 'scikit-image',
-        'dotenv': 'python-dotenv',
-        'sqlalchemy': 'SQLAlchemy',
-    }
-
+    
     def __init__(self, 
                  script_path,       # Path to generated Python script
                  output_dir=None,   # Directory to store generated files (default: same directory as script)
@@ -38,12 +38,25 @@ class Containerizer:
         self.stdlib_modules = self._get_stdlib_modules()
         # dictionary entries are package:version 
         self.installed_packages = {dist.metadata['Name'].lower(): dist.version for dist in distributions()}
+        self.IMPORT_TO_PACKAGE_MAP = {
+            'bs4': 'beautifulsoup4',
+            'PIL': 'pillow',
+            'sklearn': 'scikit-learn',
+            'cv2': 'opencv-python',
+            'yaml': 'pyyaml',
+            'wx': 'wxpython',
+            'psycopg2': 'psycopg2-binary',
+            'dateutil': 'python-dateutil',
+            'skimage': 'scikit-image',
+            'dotenv': 'python-dotenv',
+            'sqlalchemy': 'SQLAlchemy',
+        }
         self._build_distribution_map = self._build_distribution_map()
 
+
     def _build_distribution_map(self):
-        """Build a mapping from top-level modules to their distribution packages."""
+        """create mapping from top-level modules to their distribution packages"""
         dist_map = {}
-        
         for dist in pkg_resources.working_set:
             try:                # Get metadata and top-level modules
                 if dist.has_metadata('top_level.txt'):
@@ -93,7 +106,6 @@ class Containerizer:
                 self.imports.add(node.module.split('.')[0])  # Get the top-level module
         return True
 
-
     def identify_requirements(self
                               ) -> bool: #  returns True if successful, False otherwise
         """Parse the script to extract imports and identify required packages."""
@@ -124,22 +136,22 @@ class Containerizer:
     
 
     def create_containerfile(self
-                             ) -> str:          # path to Containerfile
+                             ) -> str:       # path to Containerfile
             containerfile_path = self.output_dir / "Containerfile"
             script_name = self.script_path.name
             with open(containerfile_path, 'w') as file:
-                file.write(f"FROM python:{sys.version_info.major}.{sys.version_info.minor}\n\n")
-                file.write("WORKDIR /app\n\n")
+                file.write(f"FROM python:{sys.version_info.major}.{sys.version_info.minor}\n\n") 
+                file.write("WORKDIR /app\n\n")          # sets container's working directory to /app
                 file.write("COPY requirements.txt .\n")
                 file.write("RUN pip install --no-cache-dir -r requirements.txt\n\n")
-                file.write(f"COPY {script_name} .\n\n")
-                file.write(f'CMD ["python", "{script_name}"]\n')
+                file.write(f"COPY {script_name} .\n\n") # put code in container
+                file.write(f'ENTRYPOINT ["python", "{script_name}"]\n')
             return containerfile_path
     
 
     def build_docker_image(self
                            ) -> bool:  #  returns True if successful, False otherwise
-            containerfile_path = self.create_containerfile()
+            _containerfile_path = self.create_containerfile()
             script_name = self.script_path.name
             # Copy the script to the output directory if it's not already there
             if self.script_path.parent != self.output_dir:
@@ -147,6 +159,11 @@ class Containerizer:
                 with open(self.script_path, 'rb') as src, open(target_script, 'wb') as dst:
                     dst.write(src.read())
             try:
+                docker_check = subprocess.run(["docker", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                if docker_check.returncode != 0: 
+                    print("Docker is not installed or not available in PATH. Please install Docker to build and run containers.")
+                    return False
+
                 subprocess.run(
                     ["docker", "build", "-f", "Containerfile", "-t", self.image_name, str(self.output_dir)],
                     check=True
@@ -168,8 +185,8 @@ class Containerizer:
         if not self.build_docker_image():
             return False
         return True
-
-
+    
+    
 
 def main():
     parser = argparse.ArgumentParser(description="Analyze a Python script, install its dependencies, \
@@ -193,25 +210,28 @@ def main():
     else:
         print("\nContainerization failed. Please check the errors above.")
 
-    # TODO: run the container
-    # https://qmacro.org/blog/posts/2025/03/23/how-i-run-executables-in-containers/
-    # push image to public registry/repo 
-    # we can pull it from registry and run it for them 
-    # or they can run it locally
 
-    # put code in the container
 
-    # output should be local not in container
+    #  TODO:  handle putting output somewhere (outside container)
     # go to dir where you want output to be
     # docker run -v current_dir
-    
-    # executable container - slightly different way to create them 
-    # instead of cmd to run container, use entry point (consistently works for executable container)
-    # docker run scraper. 
-    # google "executable container"
-    # 
-    # entry point cowsay
-    # docker run cowsaycontainer will show the cow.
+
+    #  TODO: user choice between running locally or have us run it 
+        # a.) local: 
+                # def create_sh_script(self) -> str:
+                #     """create shell script to start Docker service and run the container"""
+                #     sh_path = self.output_dir / f"run_{self.image_name}.sh"
+                #     with open(sh_path, 'w') as file:
+                #         file.write("#!/bin/sh\n\n")
+                #         file.write("sudo systemctl start docker\n\n")
+                #         file.write(f"docker run -v \"$(pwd)\":/data {self.image_name} \"$@\"\n")
+                #     os.chmod(sh_path, 0o755)  # Make executable
+                #     return sh_path
+
+        # b.) we run it:
+                # push container to public registry
+                # we pull it
+                # run container --where? 
 
 
 if __name__ == '__main__':
