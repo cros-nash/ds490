@@ -183,17 +183,17 @@ class GenerateCodeNode(BaseNode):
             if state["errors"]["execution"]:
                 continue
 
-            # self.logger.info("--- (Validate the Code Output Schema) ---")
-            # state = self.validation_reasoning_loop(state)
-            # if state["errors"]["validation"]:
-            #     continue
+            self.logger.info("--- (Validate the Code Output Schema) ---")
+            state = self.validation_reasoning_loop(state)
+            if state["errors"]["validation"]:
+                continue
 
-            # self.logger.info(
-            #     """--- (Checking if the informations exctrcated are the ones Requested) ---"""
-            # )
-            # state = self.semantic_comparison_loop(state)
-            # if state["errors"]["semantic"]:
-            #     continue
+            self.logger.info(
+                """--- (Checking if the informations exctrcated are the ones Requested) ---"""
+            )
+            state = self.semantic_comparison_loop(state)
+            if state["errors"]["semantic"]:
+                continue
             break
 
         if state["iteration"] == self.max_iterations["overall"] and (

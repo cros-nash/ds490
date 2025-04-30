@@ -1,7 +1,16 @@
 import asyncio
+import re
 
 from crawlee.crawlers import PlaywrightCrawler, PlaywrightCrawlingContext
-from bs4 import BeautifulSoup
+
+def clean_title(title):
+    # Standardize event titles
+    clean_title = re.sub(r'Web Summit.*', 'Web Summit', title)
+    clean_title = re.sub(r'Visa’s Global Product Drop Event.*', 'Visa’s Global Product Drop Event', clean_title)
+    
+    # Remove unnecessary suffixes like "REGISTER FOR LIVESTREAM", "HYBRID", "VIRTUAL" indicators
+    clean_title = re.sub(r"(REGISTER FOR LIVESTREAM|HYBRID|VIRTUAL)", "", clean_title)
+    return clean_title.strip()
 
 async def main() -> None:
     crawler = PlaywrightCrawler(
@@ -12,22 +21,39 @@ async def main() -> None:
     async def request_handler(context: PlaywrightCrawlingContext) -> None:
         context.log.info(f'Processing {context.request.url}')
         
-        page = await context.page.content()
-        soup = BeautifulSoup(page, 'html.parser')
-        
+        page = context.page
         events = []
-        for event in soup.select('.rhov'):
-            date = event.select_one('div:nth-child(1)').get_text(strip=True)
-            title = event.select_one('div:nth-child(2)').get_text(strip=True)
-            location = event.select_one('div:nth-child(3)').get_text(strip=True)
-            events.append({'title': title, 'date': date, 'location': location})
+        
+        # Extract the events information
+        event_divs = await page.query_selector_all('div.rhov:not(:contains("Earnings"))')
+        
+        for event_div in event_divs:
+            date_element = await event_div.query_selector('div:nth-child(1)')
+            title_element = await event_div.query_selector('div:nth-child(2)')
+            location_element = await event_div.query_selector('div:nth-child(3)')
+            
+            date = await date_element.text_content() if date_element else ''
+            title = await title_element.text_content() if title_element else ''
+            location = await location_element.text_content() if location_element else ''
+            
+            # Clean and normalize text
+            title = clean_title(title)
+            if location.strip() == '':
+                location = 'NA'
+            
+            event_data = {
+                'title': title,
+                'date': date,
+                'location': location
+            }
+            
+            events.append(event_data)
         
         data = {'events': events}
         
         await context.push_data(data)
         
-    await crawler.run(['http://www.techmeme.com/events'])
-
+    await crawler.run(['https://www.techmeme.com/events'])
 
 if __name__ == '__main__':
     asyncio.run(main())
