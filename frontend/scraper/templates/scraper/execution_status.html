@@ -6,7 +6,7 @@
 <div class="row">
     <div class="col-md-12">
         <h1>Generating Script</h1>
-        <a href="{% url 'project_detail' result.project.id %}" class="btn btn-secondary mb-3">Back to Project</a>
+        <a href="{% url 'project_detail' result.project.id %}" class="btn btn-secondary mb-3">Cancel</a>
         
         <div class="progress mb-3">
             <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
@@ -32,18 +32,14 @@
                     <div class="card-body">
                         <pre id="script-preview" class="bg-dark text-light p-3" style="height: 300px; overflow-y: auto;">
 # Python script will appear here once generated
-import requests
-from bs4 import BeautifulSoup
-import pandas as pd
-import json
 # ...
                         </pre>
                     </div>
                 </div>
                 
                 <div id="action-buttons" class="text-center mb-4">
-                    <button id="download-btn" class="btn btn-primary btn-lg me-2" disabled>Download Container</button>
-                    <button id="run-btn" class="btn btn-success btn-lg" disabled>Run Container</button>
+                    <button id="download-btn" class="btn btn-primary me-2" disabled>Download Container</button>
+                    <button id="run-btn" class="btn btn-success" disabled>Run Container</button>
                 </div>
             </div>
         </div>

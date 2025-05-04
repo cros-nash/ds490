@@ -16,6 +16,7 @@
                         <label for="id_provider" class="form-label">Provider</label>
                         {{ form.provider.errors }}
                         {{ form.provider|add_class:"form-select" }}
+                        <div class="form-text">Select LLM company.</div>
                     </div>
                     
                     <div class="mb-3">
@@ -23,22 +24,26 @@
                         {{ form.key.errors }}
                         {{ form.key|add_class:"form-control" }}
                         {% if form.instance.key %}
-                        <div class="form-text text-success">API key is set. Enter a new key to change it.</div>
+                        <div class="form-text text-success">API key is saved. Enter a new key to change it.</div>
                         {% else %}
-                        <div class="form-text">Enter your API key to use for generating scripts.</div>
                         {% endif %}
                     </div>
                     
+                    <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
                     <button type="submit" class="btn btn-primary">Save API Key</button>
-                    <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
+
                 </form>
                 
                 <div class="mt-4">
-                    <h5>Security Information</h5>
+                    <h5>What's an API key?</h5>
                     <ul class="text-muted">
-                        <li>Your API key is encrypted and stored securely.</li>
-                        <li>The key is only used for generating scraping scripts.</li>
-                        <li>You can update your key at any time.</li>
+                        <li>It's basically a special password that lets our tool talk to ChatGPT. API keys are paid services with usage-based billing. To get one, log into OpenAI's website and create one in the API keys section.</li>
+                        <li>Keep your key secure - don't share it publicly.</li>
+                    </ul>
+                    <h5>Why do I need one?</h5>
+                    <ul class="text-muted">
+                        <li>This web scraping tool uses AI to generate custom code based on your description of what you want to collect from a specified website.
+                            Your API key lets the tool access ChatGPT on your behalf.</li>
                     </ul>
                 </div>
             </div>
