@@ -144,7 +144,7 @@ def execution_status(request, result_id):
     return render(request, 'scraper/execution_status.html', {'result': result})
 
 @login_required
-def result_detail(request, result_id):
+def results_screen(request, result_id):
     result = get_object_or_404(ScrapingResult, pk=result_id, project__user=request.user)
     
     # Parse result data based on output format
@@ -157,7 +157,7 @@ def result_detail(request, result_id):
     else:
         result_data = result.result_data
     
-    return render(request, 'scraper/result_detail.html', {
+    return render(request, 'scraper/results_screen.html', {
         'result': result,
         'result_data': result_data
     })
