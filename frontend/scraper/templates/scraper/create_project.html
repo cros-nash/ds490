@@ -6,39 +6,42 @@
 <div class="row">
     <div class="col-md-12">
         <h1>Create New Project</h1>
-        <a href="{% url 'home' %}" class="btn btn-secondary mb-3">Back to Home</a>
+        
         
         <form method="post">
             {% csrf_token %}
             
             <div class="row">
                 <div class="col-md-8">
+
                     <div class="card mb-4">
+
                         <div class="card-header">
                             <h5>Project Information</h5>
                         </div>
+
                         <div class="card-body">
                             <div class="mb-3">
                                 <label for="id_name" class="form-label">Project Name</label>
                                 {{ form.name.errors }}
                                 {{ form.name|add_class:"form-control" }}
                             </div>
-                            
                             <div class="mb-3">
                                 <label for="id_website" class="form-label">Website URL</label>
                                 {{ form.website.errors }}
                                 {{ form.website|add_class:"form-control" }}
                                 <div class="form-text">The website you want to scrape</div>
                             </div>
-                            
                             <div class="mb-3">
                                 <label for="id_llm_input" class="form-label">LLM Instructions</label>
                                 {{ form.llm_input.errors }}
                                 {{ form.llm_input|add_class:"form-control" }}
                                 <div class="form-text">Describe what data you want to extract from the website</div>
-                            </div>
+                            </div>                        
                         </div>
                     </div>
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'home' %}'">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Project</button>
                 </div>
                 
                 <div class="col-md-4">
@@ -99,9 +102,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <button type="submit" class="btn btn-primary">Create Project</button>
         </form>
     </div>
 </div>
