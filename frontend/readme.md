@@ -2,8 +2,7 @@
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/web-scraping-tool.git
-   cd web-scraping-tool
+   git clone https://github.com/cros-nash/ds490.git
    ```
 
 2. Create and activate a virtual environment + install dependencies:
@@ -11,6 +10,7 @@
    python -m venv mvenv
    source myenv/bin/activate
    pip install django requests django-widget-tweaks
+   cd ds490/frontend
    ```
 
 3. Create database:
