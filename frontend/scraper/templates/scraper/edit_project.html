@@ -1,0 +1,108 @@
+{% extends 'scraper/base.html' %}
+{% load widget_tweaks %}
+{% block title %}Edit {{ project.name }} - Web Scraping Tool{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Edit Project</h1>
+        <a href="{% url 'project_detail' project.id %}" class="btn btn-secondary mb-3">Back to Project</a>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>Project Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="id_name" class="form-label">Project Name</label>
+                                {{ form.name.errors }}
+                                {{ form.name|add_class:"form-control" }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_website" class="form-label">Website URL</label>
+                                {{ form.website.errors }}
+                                {{ form.website|add_class:"form-control" }}
+                                <div class="form-text">The website you want to scrape</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_llm_input" class="form-label">LLM Instructions</label>
+                                {{ form.llm_input.errors }}
+                                {{ form.llm_input|add_class:"form-control" }}
+                                <div class="form-text">Describe what data you want to extract from the website</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>Advanced Settings</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3 form-check">
+                                {{ form.respect_robots|add_class:"form-check-input" }}
+                                <label for="id_respect_robots" class="form-check-label">Respect robots.txt</label>
+                            </div>
+                            
+                            <div class="mb-3 form-check">
+                                {{ form.pagination|add_class:"form-check-input" }}
+                                <label for="id_pagination" class="form-check-label">Use pagination</label>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_delay" class="form-label">Delay between requests (seconds)</label>
+                                {{ form.delay|add_class:"form-control" }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_max_pages" class="form-label">Maximum pages</label>
+                                {{ form.max_pages|add_class:"form-control" }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_timeout" class="form-label">Request timeout (seconds)</label>
+                                {{ form.timeout|add_class:"form-control" }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_user_agent" class="form-label">User Agent</label>
+                                {{ form.user_agent|add_class:"form-control" }}
+                            </div>
+                            
+                            <div class="mb-3 form-check">
+                                {{ form.verbose_logging|add_class:"form-check-input" }}
+                                <label for="id_verbose_logging" class="form-check-label">Verbose logging</label>
+                            </div>
+                            
+                            <div class="mb-3 form-check">
+                                {{ form.download_html|add_class:"form-check-input" }}
+                                <label for="id_download_html" class="form-check-label">Download raw HTML</label>
+                            </div>
+                            
+                            <div class="mb-3 form-check">
+                                {{ form.screenshot|add_class:"form-check-input" }}
+                                <label for="id_screenshot" class="form-check-label">Take screenshots</label>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_output_format" class="form-label">Output Format</label>
+                                {{ form.output_format|add_class:"form-select" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
