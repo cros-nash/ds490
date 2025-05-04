@@ -1,0 +1,61 @@
+{% extends 'scraper/base.html' %}
+
+{% block title %}Result Detail - Web Scraping Tool{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Scraping Results</h1>
+        <h3>{{ result.project.name }}</h3>
+        <a href="{% url 'project_detail' result.project.id %}" class="btn btn-secondary mb-3">Back to Project</a>
+        
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Previous Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            {% for r in result.project.results.all %}
+                                <li class="list-group-item {% if r.id == result.id %}active{% endif %}">
+                                    <a href="{% url 'results_screen' r.id %}" class="{% if r.id == result.id %}text-white{% endif %}">
+                                        {{ r.created_at|date:"M d, Y H:i" }}
+                                    </a>
+                                    <span class="badge {% if r.status == 'completed' %}bg-success{% elif r.status == 'failed' %}bg-danger{% else %}bg-warning{% endif %} float-end">
+                                        {{ r.status }}
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'download_container' result.id %}" class="btn btn-primary">Download Container</a>
+                            <a href="{% url 'generate_script' result.project.id %}" class="btn btn-success">Re-run Scraper</a>
+                            <a href="{% url 'edit_project' result.project.id %}" class="btn btn-warning">Edit Project Settings</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-9">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Scraped Data</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light p-3" style="height: 500px; overflow-y: auto;">{{ result_data }}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

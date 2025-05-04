@@ -1,0 +1,128 @@
+{% extends 'scraper/base.html' %}
+
+{% block title %}Execution Status - Web Scraping Tool{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Generating Script</h1>
+        <a href="{% url 'project_detail' result.project.id %}" class="btn btn-secondary mb-3">Back to Project</a>
+        
+        <div class="progress mb-3">
+            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Logs</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre id="log-output" class="bg-dark text-light p-3" style="height: 300px; overflow-y: auto;"></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Generated Script</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre id="script-preview" class="bg-dark text-light p-3" style="height: 300px; overflow-y: auto;">
+# Python script will appear here once generated
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+import json
+# ...
+                        </pre>
+                    </div>
+                </div>
+                
+                <div id="action-buttons" class="text-center mb-4">
+                    <button id="download-btn" class="btn btn-primary btn-lg me-2" disabled>Download Container</button>
+                    <button id="run-btn" class="btn btn-success btn-lg" disabled>Run Container</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // JavaScript to poll for logs and update UI
+    let progressValue = 0;
+    const progressBar = document.getElementById('progress-bar');
+    const logOutput = document.getElementById('log-output');
+    const downloadBtn = document.getElementById('download-btn');
+    const runBtn = document.getElementById('run-btn');
+    
+    function updateProgress(value) {
+        progressValue = value;
+        progressBar.style.width = `${value}%`;
+    }
+    
+    function pollLogs() {
+        fetch('{% url "get_logs" result.id %}')
+            .then(response => response.json())
+            .then(data => {
+                logOutput.textContent = data.log;
+                logOutput.scrollTop = logOutput.scrollHeight;
+                
+                if (data.status === 'running') {
+                    // Update progress based on log content
+                    if (data.log.includes('Container built successfully')) {
+                        updateProgress(100);
+                        enableButtons();
+                    } else if (data.log.includes('Building container image')) {
+                        updateProgress(75);
+                    } else if (data.log.includes('Creating Containerfile')) {
+                        updateProgress(50);
+                    } else if (data.log.includes('Dependencies identified')) {
+                        updateProgress(30);
+                    } else if (data.log.includes('Script file created')) {
+                        updateProgress(15);
+                    } else {
+                        updateProgress(5);
+                    }
+                    
+                    // Continue polling
+                    setTimeout(pollLogs, 1000);
+                } else if (data.status === 'completed') {
+                    updateProgress(100);
+                    enableButtons();
+                } else {
+                    // Failed status
+                    progressBar.classList.remove('bg-primary');
+                    progressBar.classList.add('bg-danger');
+                    updateProgress(100);
+                }
+            })
+            .catch(error => {
+                console.error('Error polling logs:', error);
+                setTimeout(pollLogs, 3000);  // retry with longer delay on error
+            });
+    }
+    
+    function enableButtons() {
+        downloadBtn.disabled = false;
+        runBtn.disabled = false;
+        
+        downloadBtn.addEventListener('click', function() {
+            window.location.href = '{% url "download_container" result.id %}';
+        });
+        
+        runBtn.addEventListener('click', function() {
+            window.location.href = '{% url "results_screen" result.id %}';
+        });
+    }
+    
+    // Start polling when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        pollLogs();
+    });
+</script>
+{% endblock %}

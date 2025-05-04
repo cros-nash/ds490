@@ -1,0 +1,59 @@
+{% extends 'scraper/base.html' %}
+
+{% block title %}Home - Web Scraping Tool{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>My Projects</h1>
+        
+        {% if not has_api_key %}
+            <div class="alert alert-warning">
+                You need to <a href="{% url 'api_key' %}">set up your API key</a> before creating projects.
+            </div>
+        {% endif %}
+        
+        <div class="mb-4">
+            <a href="{% url 'create_project' %}" class="btn btn-primary" {% if not has_api_key %}disabled{% endif %}>
+                Create New Project
+            </a>
+            <a href="{% url 'api_key' %}" class="btn btn-secondary">
+                Edit API Key
+            </a>
+        </div>
+        
+        {% if projects %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Project Name</th>
+                            <th>Website</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for project in projects %}
+                            <tr>
+                                <td>{{ project.name }}</td>
+                                <td>{{ project.website }}</td>
+                                <td>{{ project.created_at|date:"M d, Y" }}</td>
+                                <td>
+                                    <a href="{% url 'project_detail' project.id %}" class="btn btn-sm btn-info">View</a>
+                                    <a href="{% url 'edit_project' project.id %}" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="{% url 'delete_project' project.id %}" class="btn btn-sm btn-danger">Delete</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                You don't have any projects yet. Click "Create New Project" to get started!
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

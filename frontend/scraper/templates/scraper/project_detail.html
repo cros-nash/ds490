@@ -1,0 +1,133 @@
+{% extends 'scraper/base.html' %}
+
+{% block title %}{{ project.name }} - Web Scraping Tool{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>{{ project.name }}</h1>
+        <a href="{% url 'home' %}" class="btn btn-secondary mb-3">Back to Home</a>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Project Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <p><strong>Website:</strong> {{ project.website }}</p>
+                        <p><strong>LLM Instructions:</strong> {{ project.llm_input }}</p>
+                        <p><strong>Created:</strong> {{ project.created_at|date:"M d, Y" }}</p>
+                        <p><strong>Last Updated:</strong> {{ project.updated_at|date:"M d, Y" }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'edit_project' project.id %}" class="btn btn-warning">Edit Project</a>
+                            <a href="{% url 'delete_project' project.id %}" class="btn btn-danger">Delete Project</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Advanced Settings</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <strong>Respect robots.txt:</strong> 
+                                {% if project.respect_robots %}Yes{% else %}No{% endif %}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Pagination:</strong> 
+                                {% if project.pagination %}Enabled{% else %}Disabled{% endif %}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Delay between requests:</strong> {{ project.delay }} seconds
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Maximum pages:</strong> {{ project.max_pages }}
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <strong>Request timeout:</strong> {{ project.timeout }} seconds
+                            </li>
+                            <li class="list-group-item">
+                                <strong>User Agent:</strong> 
+                                {% if project.user_agent %}{{ project.user_agent }}{% else %}Default{% endif %}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Output format:</strong> {{ project.output_format|upper }}
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Other settings:</strong>
+                                {% if project.verbose_logging %}Verbose logging{% endif %}
+                                {% if project.download_html %}Download HTML{% endif %}
+                                {% if project.screenshot %}Take screenshots{% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-4">
+            <a href="{% url 'generate_script' project.id %}" class="btn btn-primary btn-lg">Generate Scraping Script</a>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Past Results</h5>
+            </div>
+            <div class="card-body">
+                {% if results %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in results %}
+                                    <tr>
+                                        <td>{{ result.created_at|date:"M d, Y H:i" }}</td>
+                                        <td>
+                                            <span class="badge {% if result.status == 'completed' %}bg-success{% elif result.status == 'failed' %}bg-danger{% else %}bg-warning{% endif %}">
+                                                {{ result.status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if result.status == 'completed' %}
+                                                <a href="{% url 'results_screen' result.id %}" class="btn btn-sm btn-info">View Results</a>
+                                                <a href="{% url 'download_container' result.id %}" class="btn btn-sm btn-primary">Download Container</a>
+                                            {% elif result.status == 'running' %}
+                                                <a href="{% url 'execution_status' result.id %}" class="btn btn-sm btn-warning">View Progress</a>
+                                            {% else %}
+                                                <a href="{% url 'results_screen' result.id %}" class="btn btn-sm btn-danger">View Error</a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        No results yet. Click "Generate Scraping Script" to start scraping.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
