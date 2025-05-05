@@ -425,7 +425,7 @@ class GenerateCodeNode(BaseNode):
             loader = DirectoryLoader("docs/crawlee", glob="**/*.mdx", show_progress=True)
             docs = loader.load()
             splitter = RecursiveCharacterTextSplitter(
-                chunk_size=800, chunk_overlap=100
+                chunk_size=1200, chunk_overlap=100
             )
             chunks = splitter.split_documents(docs)
             self.doc_index = FAISS.from_documents(chunks, OpenAIEmbeddings())
