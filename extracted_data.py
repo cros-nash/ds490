@@ -1,16 +1,6 @@
 import asyncio
-import re
 
 from crawlee.crawlers import PlaywrightCrawler, PlaywrightCrawlingContext
-
-def clean_title(title):
-    # Standardize event titles
-    clean_title = re.sub(r'Web Summit.*', 'Web Summit', title)
-    clean_title = re.sub(r'Visa’s Global Product Drop Event.*', 'Visa’s Global Product Drop Event', clean_title)
-    
-    # Remove unnecessary suffixes like "REGISTER FOR LIVESTREAM", "HYBRID", "VIRTUAL" indicators
-    clean_title = re.sub(r"(REGISTER FOR LIVESTREAM|HYBRID|VIRTUAL)", "", clean_title)
-    return clean_title.strip()
 
 async def main() -> None:
     crawler = PlaywrightCrawler(
@@ -21,39 +11,25 @@ async def main() -> None:
     async def request_handler(context: PlaywrightCrawlingContext) -> None:
         context.log.info(f'Processing {context.request.url}')
         
-        page = context.page
-        events = []
+        elements = await context.page.query_selector_all('article.col--6')
         
-        # Extract the events information
-        event_divs = await page.query_selector_all('div.rhov:not(:contains("Earnings"))')
+        examples = []
         
-        for event_div in event_divs:
-            date_element = await event_div.query_selector('div:nth-child(1)')
-            title_element = await event_div.query_selector('div:nth-child(2)')
-            location_element = await event_div.query_selector('div:nth-child(3)')
-            
-            date = await date_element.text_content() if date_element else ''
-            title = await title_element.text_content() if title_element else ''
-            location = await location_element.text_content() if location_element else ''
-            
-            # Clean and normalize text
-            title = clean_title(title)
-            if location.strip() == '':
-                location = 'NA'
-            
-            event_data = {
-                'title': title,
-                'date': date,
-                'location': location
-            }
-            
-            events.append(event_data)
+        for element in elements:
+            name = await (await element.query_selector('h2.cardTitle_rnsV')).text_content()
+            if name in ["Crawl all links on website", "Crawl multiple URLs"]:
+                examples.append({
+                    'name': name,
+                    'description': await (await element.query_selector('p.cardDescription_PWke')).text_content(),
+                    'url': await (await element.query_selector('a.cardContainer_fWXF')).get_attribute('href')
+                })
         
-        data = {'events': events}
+        data = {'examples': examples}
         
         await context.push_data(data)
         
-    await crawler.run(['https://www.techmeme.com/events'])
+    await crawler.run(['https://crawlee.dev/python/docs/examples'])
+
 
 if __name__ == '__main__':
     asyncio.run(main())

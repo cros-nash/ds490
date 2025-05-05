@@ -359,13 +359,12 @@ class GenerateCodeNode(BaseNode):
 
             if getattr(self, "doc_index", None):
                 query = (
-                    state["initial_analysis"]
-                    + state["html_analysis"]
+                    state["html_analysis"]
                     + " Validation errors: "
                     + " ".join(errors)
                 )
                 relevant_docs = self.doc_index.similarity_search(query, k=12)
-                crawlee_snippet = "\n\n".join(d.page_content for d in relevant_docs)
+                crawlee_snippet = "\n\n*SIMILARITY SEARCH RESULT USING HTML ANALYSIS AND VALIDATION ERRORS AS QUERY*:\n".join(d.page_content for d in relevant_docs)
                 analysis = f"{crawlee_snippet}\n\n{analysis_text}"
             else:
                 analysis = analysis_text
@@ -423,7 +422,7 @@ class GenerateCodeNode(BaseNode):
         """
         # ——— build or reuse the documentation index ———
         if not hasattr(self, "doc_index") or self.doc_index is None:
-            loader = DirectoryLoader("docs/crawlee", glob="**/*.mdx")
+            loader = DirectoryLoader("docs/crawlee", glob="**/*.mdx", show_progress=True)
             docs = loader.load()
             splitter = RecursiveCharacterTextSplitter(
                 chunk_size=800, chunk_overlap=100
@@ -432,19 +431,19 @@ class GenerateCodeNode(BaseNode):
             self.doc_index = FAISS.from_documents(chunks, OpenAIEmbeddings())
         index = self.doc_index
 
-        query = state["initial_analysis"] + state["html_analysis"]
-        relevant = index.similarity_search(query, k=12)
-        crawlee_snippet = "\n\n".join(d.page_content for d in relevant)
+        query = state["html_analysis"]
+        relevant = index.similarity_search(query, k=10, fetch_k=50)
+        crawlee_snippet = "\n\n*SIMILARITY SEARCH RESULT USING HTML ANALYSIS AS QUERY*:\n".join(d.page_content for d in relevant)
 
         prompt = PromptTemplate(
             template=DEFAULT_CRAWLEE_TEMPLATE,
             partial_variables={
-                "user_input": state["user_input"],
-                "json_schema": state["json_schema"],
+                "user_input":       state["user_input"],
+                "json_schema":      state["json_schema"],
                 "initial_analysis": state["initial_analysis"],
-                "html_code": state["html_code"],
-                "html_analysis": state["html_analysis"],
-                "crawlee_snippet": crawlee_snippet,
+                "html_code":        state["html_code"],
+                "html_analysis":    state["html_analysis"],
+                "crawlee_snippet":  crawlee_snippet,
             },
         )
         output_parser = StrOutputParser()
