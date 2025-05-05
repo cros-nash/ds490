@@ -1,6 +1,9 @@
 import asyncio
 
 from crawlee.crawlers import PlaywrightCrawler, PlaywrightCrawlingContext
+from bs4 import BeautifulSoup
+import itertools
+import time
 
 async def main() -> None:
     crawler = PlaywrightCrawler(
@@ -11,24 +14,44 @@ async def main() -> None:
     async def request_handler(context: PlaywrightCrawlingContext) -> None:
         context.log.info(f'Processing {context.request.url}')
         
-        elements = await context.page.query_selector_all('article.col--6')
+        page = await context.page.content()
+        soup = BeautifulSoup(page, 'html.parser')
         
-        examples = []
-        
-        for element in elements:
-            name = await (await element.query_selector('h2.cardTitle_rnsV')).text_content()
-            if name in ["Crawl all links on website", "Crawl multiple URLs"]:
-                examples.append({
-                    'name': name,
-                    'description': await (await element.query_selector('p.cardDescription_PWke')).text_content(),
-                    'url': await (await element.query_selector('a.cardContainer_fWXF')).get_attribute('href')
+        cases = []
+        for case_row in soup.select('table.case-list tr'):
+            case_number = case_row.select_one('.case-number').text.strip()
+            filing_date = case_row.select_one('.filing-date').text.strip()
+            plaintiff_name = case_row.select_one('.plaintiff-name').text.strip()
+            defendant_name = case_row.select_one('.defendant-name').text.strip()
+            case_outcome = case_row.select_one('.case-outcome').text.strip()
+            county = case_row.select_one('.county').text.strip()
+            
+            case_history = []
+            for event in case_row.select('.case-history .event'):
+                event_date = event.select_one('.event-date').text.strip()
+                event_description = event.select_one('.event-description').text.strip()
+                case_history.append({
+                    'event_date': event_date,
+                    'event_description': event_description
                 })
+            
+            cases.append({
+                'case_number': case_number,
+                'filing_date': filing_date,
+                'plaintiff_name': plaintiff_name,
+                'defendant_name': defendant_name,
+                'case_outcome': case_outcome,
+                'case_history': case_history,
+                'county': county
+            })
         
-        data = {'examples': examples}
+        data = {'cases': cases}
         
         await context.push_data(data)
         
-    await crawler.run(['https://crawlee.dev/python/docs/examples'])
+        time.sleep(1)  # Implementing delay between requests
+        
+    await crawler.run(['https://www.oscn.net/dockets/Search.aspx'])
 
 
 if __name__ == '__main__':

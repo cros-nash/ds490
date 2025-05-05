@@ -18,9 +18,7 @@ from langchain_community.chat_models import ChatOllama
 from langchain_core.output_parsers import StrOutputParser
 
 from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import DirectoryLoader
+from defaults import NODE_DEFAULTS
 
 from scrapegraphai.prompts import TEMPLATE_SEMANTIC_COMPARISON
 from crawlee_prompt import DEFAULT_CRAWLEE_TEMPLATE
@@ -65,7 +63,11 @@ class GenerateCodeNode(BaseNode):
     ):
         super().__init__(node_name, "node", input, output, 2, node_config)
 
-        self.llm_model = node_config["llm_model"]
+        self.llm_model = node_config.get("llm_model")
+        
+        for _param in ("temperature", "top_p", "max_tokens", "seed"):
+            if _param in node_config and hasattr(self.llm_model, _param):
+                setattr(self.llm_model, _param, node_config[_param])
 
         if isinstance(node_config["llm_model"], ChatOllama):
             self.llm_model.format = "json"
@@ -83,20 +85,15 @@ class GenerateCodeNode(BaseNode):
 
         self.additional_info = node_config.get("additional_info")
 
-        self.max_iterations = node_config.get(
-            "max_iterations",
-            {
-                "overall": 10,
-                "syntax": 3,
-                "execution": 3,
-                "validation": 3,
-                "semantic": 3,
-            },
-        )
+        defaults = NODE_DEFAULTS
+        retrieval_cfg = node_config.get("retrieval", defaults["retrieval"])
+        self.initial_k = retrieval_cfg.get("initial_k", defaults["retrieval"]["initial_k"])
+        self.execution_k = retrieval_cfg.get("execution_k", defaults["retrieval"]["execution_k"])
+        self.validation_k = retrieval_cfg.get("validation_k", defaults["retrieval"]["validation_k"])
+        self.max_iterations = node_config.get("max_iterations", defaults["max_iterations"])
 
         self.output_schema = node_config.get("schema")
-        
-        self.doc_index = None
+        self.embedder = node_config.get("embedder_model")
 
     def execute(self, state: dict) -> dict:
         """
@@ -118,31 +115,28 @@ class GenerateCodeNode(BaseNode):
 
         self.logger.info(f"--- Executing {self.node_name} Node ---")
 
-        input_keys = self.get_input_keys(state)
-
-        input_data = [state[key] for key in input_keys]
-
-        user_prompt = input_data[0]
-        refined_prompt = input_data[1]
-        html_info = input_data[2]
-        reduced_html = input_data[3]
-        answer = input_data[4]
-
-        self.raw_html = state["original_html"][0].page_content
+        user_prompt = state.get("user_prompt")
+        refined_prompt = state.get("refined_prompt")
+        html_info = state.get("html_info")
+        reduced_html = state.get("reduced_html")
+        vectorial_db = state.get("vectorial_db")
+        answer = state.get("answer")
+        self.raw_html = state.get("original_html", [None])[0].page_content if state.get("original_html") else None
 
         simplefied_schema = str(transform_schema(self.output_schema.schema()))
 
         reasoning_state = {
-            "user_input": user_prompt,
-            "json_schema": simplefied_schema,
+            "user_input":       user_prompt,
+            "json_schema":      simplefied_schema,
             "initial_analysis": refined_prompt,
-            "html_code": reduced_html,
-            "html_analysis": html_info,
-            "generated_code": "",
+            "html_code":        reduced_html,
+            "html_analysis":    html_info,
+            "vectorial_db":     vectorial_db,
+            "generated_code":   "",
             "execution_result": None,
             "reference_answer": answer,
-            "errors": {"syntax": [], "execution": [], "validation": [], "semantic": []},
-            "iteration": 0,
+            "errors":           {"syntax": [], "execution": [], "validation": [], "semantic": []},
+            "iteration":        0,
         }
 
         final_state = self.overall_reasoning_loop(reasoning_state)
@@ -246,8 +240,6 @@ class GenerateCodeNode(BaseNode):
         for _ in range(self.max_iterations["execution"]):
             code = state["generated_code"]
             
-            
-            
             try:
                 with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False) as tmp:
                     tmp.write(code)
@@ -281,20 +273,20 @@ class GenerateCodeNode(BaseNode):
                     if "ERROR" in full_output:
                         err = full_output.strip()
                         state["errors"]["execution"] = [err]
-                        self.logger.info(f"--- (Code Execution Error: {err}) ---")
+                        self.logger.info(f"--- (Code Execution Error) ---")
                     else:
                         state["execution_result"] = full_output.strip()
                         state["errors"]["execution"] = []
-                        return state  # SUCCESS, exit early
+                        return state  # SUCCESS
                 else:
                     err = full_output.strip()
                     state["errors"]["execution"] = [err]
-                    self.logger.info(f"--- (Code Execution Error: {err}) ---")
+                    self.logger.info(f"--- (Code Execution Error) ---")
 
             except Exception as exc:
                 err = str(exc)
                 state["errors"]["execution"] = [err]
-                self.logger.info(f"--- (Code Execution Exception: {err}) ---")
+                self.logger.info(f"--- (Code Execution Exception) ---")
 
             finally:
                 try:
@@ -302,8 +294,26 @@ class GenerateCodeNode(BaseNode):
                 except Exception:
                     pass
 
-            # If execution failed, regenerate the code
-            analysis = execution_focused_analysis(state, self.llm_model)
+            analysis_text = execution_focused_analysis(state, self.llm_model)
+            query = state["html_analysis"] + " Execution errors: " + " ".join(err)
+            client = state["vectorial_db"]
+            embedder = self.node_config.get("embedder_model") or OpenAIEmbeddings()
+            query_vector = embedder.embed_query(query)
+            print(query)
+            print('\n\nreached hits')
+            hits = client.search(
+                collection_name="vectorial_collection",
+                query_vector=query_vector,
+                limit=self.execution_k,
+            )
+            print('\n\nat snippets')
+            snippets = [h.payload.get("text", "") for h in hits]
+            crawlee_snippet = (
+                "\n\n*HITS FROM VECTOR DATABASE USING HTML ANALYSIS AND EXECUTION ERRORS AS QUERY*:\n"
+                + "\n\n".join(snippets)
+            )
+            analysis = f"{crawlee_snippet}\n\n{analysis_text}"
+            
             self.logger.info("--- (Regenerating Code to fix the Error) ---")
             state["generated_code"] = execution_focused_code_generation(state, analysis, self.llm_model)
             state["generated_code"] = extract_code(state["generated_code"])
@@ -356,18 +366,21 @@ class GenerateCodeNode(BaseNode):
             )
 
             analysis_text = validation_focused_analysis(state, self.llm_model)
-
-            if getattr(self, "doc_index", None):
-                query = (
-                    state["html_analysis"]
-                    + " Validation errors: "
-                    + " ".join(errors)
-                )
-                relevant_docs = self.doc_index.similarity_search(query, k=12)
-                crawlee_snippet = "\n\n*SIMILARITY SEARCH RESULT USING HTML ANALYSIS AND VALIDATION ERRORS AS QUERY*:\n".join(d.page_content for d in relevant_docs)
-                analysis = f"{crawlee_snippet}\n\n{analysis_text}"
-            else:
-                analysis = analysis_text
+            query = state["html_analysis"] + " Validation errors: " + " ".join(errors)
+            client = state["vectorial_db"]
+            embedder = self.node_config.get("embedder_model") or OpenAIEmbeddings()
+            query_vector = embedder.embed_query(query)
+            hits = client.search(
+                collection_name="vectorial_collection",
+                query_vector=query_vector,
+                limit=self.validation_k,
+            )
+            snippets = [h.payload.get("text", "") for h in hits]
+            crawlee_snippet = (
+                "\n\n*HITS FROM VECTOR DATABASE USING HTML ANALYSIS AND VALIDATION ERRORS AS QUERY*:\n"
+                + "\n\n".join(snippets)
+            )
+            analysis = f"{crawlee_snippet}\n\n{analysis_text}"
 
             self.logger.info(
                 "--- (Regenerating Code to make the Output compliant) ---"
@@ -420,21 +433,22 @@ class GenerateCodeNode(BaseNode):
         """
         Generates the initial code based on the provided state.
         """
-        # ——— build or reuse the documentation index ———
-        if not hasattr(self, "doc_index") or self.doc_index is None:
-            loader = DirectoryLoader("docs/crawlee", glob="**/*.mdx", show_progress=True)
-            docs = loader.load()
-            splitter = RecursiveCharacterTextSplitter(
-                chunk_size=1200, chunk_overlap=100
-            )
-            chunks = splitter.split_documents(docs)
-            self.doc_index = FAISS.from_documents(chunks, OpenAIEmbeddings())
-        index = self.doc_index
 
-        query = state["html_analysis"]
-        relevant = index.similarity_search(query, k=10, fetch_k=50)
-        crawlee_snippet = "\n\n*SIMILARITY SEARCH RESULT USING HTML ANALYSIS AS QUERY*:\n".join(d.page_content for d in relevant)
+        query = state.get("html_analysis", "")
+        client = state["vectorial_db"]
+        embedder = self.node_config.get("embedder_model") or OpenAIEmbeddings()
 
+        query_vector = embedder.embed_query(query)
+        hits = client.search(
+            collection_name="vectorial_collection",
+            query_vector=query_vector,
+            limit=self.initial_k,
+        )
+        snippets = [h.payload.get("text", "") for h in hits]
+        crawlee_snippet = (
+            "\n\n*HITS FROM VECTOR DATABASE USING HTML ANALYSIS AS QUERY*:\n"
+            + "\n\n".join(snippets)
+        )
         prompt = PromptTemplate(
             template=DEFAULT_CRAWLEE_TEMPLATE,
             partial_variables={

@@ -15,11 +15,14 @@ from scrapegraphai.nodes import (
 )
 
 from generate_crawlee_code_node import GenerateCodeNode
+from crawlee_rag_node import RAGNode
 
 from scrapegraphai.utils.save_code_to_file import save_code_to_file
 from scrapegraphai.graphs.abstract_graph import AbstractGraph
 from scrapegraphai.graphs.base_graph import BaseGraph
 
+from langchain_openai import OpenAIEmbeddings
+from defaults import NODE_DEFAULTS
 
 class CodeGeneratorGraph(AbstractGraph):
     """
@@ -128,24 +131,32 @@ class CodeGeneratorGraph(AbstractGraph):
                 "reduction": self.config.get("reduction", 0),
             },
         )
+        
+        rag_node = RAGNode(
+            input=None,
+            output=["vectorial_db"],
+            node_config={
+            "llm_model":    self.llm_model,
+            "embedder_model": self.config.get("embedder_model", OpenAIEmbeddings()),
+            "client_type":  "local_db",
+            "verbose":      self.config.get("verbose", False),
+            },
+        )
 
+        llm_params = self.config.get("llm", {}) or {}
+        retrieval_params = self.config.get("retrieval", NODE_DEFAULTS["retrieval"])
+        max_iter = self.config.get("max_iterations", NODE_DEFAULTS["max_iterations"])
         generate_code_node = GenerateCodeNode(
-            input="user_prompt & refined_prompt & html_info & reduced_html & answer",
+            input="user_prompt & refined_prompt & html_info & reduced_html & vectorial_db & answer",
             output=["generated_code"],
             node_config={
                 "llm_model": self.llm_model,
+                **llm_params,
+                "retrieval": retrieval_params,
+                "max_iterations": max_iter,
                 "additional_info": self.config.get("additional_info"),
                 "schema": self.schema,
-                "max_iterations": self.config.get(
-                    "max_iterations",
-                    {
-                        "overall": 10,
-                        "syntax": 3,
-                        "execution": 3,
-                        "validation": 3,
-                        "semantic": 3,
-                    },
-                ),
+                "embedder_model": self.config.get("embedder_model", OpenAIEmbeddings()),
             },
         )
 
@@ -156,6 +167,7 @@ class CodeGeneratorGraph(AbstractGraph):
                 generate_validation_answer_node,
                 prompt_refier_node,
                 html_analyzer_node,
+                rag_node,
                 generate_code_node,
             ],
             edges=[
@@ -163,7 +175,8 @@ class CodeGeneratorGraph(AbstractGraph):
                 (parse_node, generate_validation_answer_node),
                 (generate_validation_answer_node, prompt_refier_node),
                 (prompt_refier_node, html_analyzer_node),
-                (html_analyzer_node, generate_code_node),
+                (html_analyzer_node, rag_node),
+                (rag_node, generate_code_node),
             ],
             entry_point=fetch_node,
             graph_name=self.__class__.__name__,
@@ -207,32 +220,39 @@ class CodeGeneratorGraph(AbstractGraph):
         use_cache = os.path.isfile(cache_file) and not self.config.get("force", False)
 
         if use_cache:
+            # Load cached state (excluding vector DB) and rehydrate
             print("CACHE IS BEING USED :)")
             with open(cache_file, "r") as f:
                 cached = json.load(f)
-            # rehydrate the Document objects
             original_html = [
                 Document(page_content=d["page_content"], metadata=d["metadata"])
-                for d in cached["original_html"]
+                for d in cached.get("original_html", [])
             ]
             state = {
                 "user_prompt":    self.prompt,
                 self.input_key:   self.source,
                 "original_html":  original_html,
-                "refined_prompt": cached["refined_prompt"],
-                "html_info":      cached["html_info"],
-                "reduced_html":   cached["reduced_html"],
-                "answer":         cached["answer"],
+                "refined_prompt": cached.get("refined_prompt"),
+                "html_info":      cached.get("html_info"),
+                "reduced_html":   cached.get("reduced_html"),
+                "answer":         cached.get("answer"),
             }
+            # Restore vector DB client from persistent store
+            try:
+                from qdrant_client import QdrantClient
+            except ImportError:
+                raise ImportError("qdrant_client is required to restore vector DB. Install via 'pip install qdrant-client'.")
+            state["vectorial_db"] = QdrantClient(path=self.config.get("client_path", "databases/crawlee_db"))
 
         else:
+            # First run: execute all upstream nodes and cache intermediate results
             print("CACHE IS BEING CREATED")
             state = {"user_prompt": self.prompt, self.input_key: self.source}
             upstream_nodes = self.graph.nodes[:-1]
             for node in upstream_nodes:
                 state = node.execute(state)
 
-            # serialize their outputs immediately
+            # Serialize original HTML docs and other serializable state
             orig = state.get("original_html", [])
             serialized = [
                 {"page_content": doc.page_content, "metadata": doc.metadata}
@@ -245,6 +265,7 @@ class CodeGeneratorGraph(AbstractGraph):
                 "reduced_html":   state.get("reduced_html"),
                 "answer":         state.get("answer"),
             }
+            # Write cache (exclude non-serializable vector DB client)
             with open(cache_file, "w") as f:
                 json.dump(to_cache, f)
 

@@ -13,6 +13,8 @@ graph_config = {
     "llm": {
         "api_key": os.getenv('OPENAI_API_KEY'),
         "model": "openai/gpt-4o",
+        "temperature" : 0,
+        "top_p" : 1,
     },
     "verbose": True,
     "headless": False,
