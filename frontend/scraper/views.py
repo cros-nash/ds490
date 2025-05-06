@@ -20,7 +20,6 @@ import sys
 from .script_generator import generate_script as generate_script_with_llm
 
 def load_containerizer():
-    """Dynamically load Containerizer from project root"""
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     module_path = os.path.join(project_root, 'containerizer.py')
     
@@ -170,7 +169,6 @@ def project_detail(request, pk):
 
 @login_required
 def add_field_specification(request):
-    """AJAX endpoint to add a new field specification row"""
     if request.method == 'POST':
         data = json.loads(request.body)
         field_form = FieldSpecificationForm(data)
