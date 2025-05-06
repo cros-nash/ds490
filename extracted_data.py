@@ -11,36 +11,31 @@ async def main() -> None:
     async def request_handler(context: PlaywrightCrawlingContext) -> None:
         context.log.info(f'Processing {context.request.url}')
         
-        html = await context.page.content()
         items = []
-        
-        for page in range(1, 3):
-            selector = f'.col-md-4.col-xl-4.col-lg-4'
-            products = context.page.locator(selector)
+        # Navigate through the pages using context.page.goto()
+        for page_num in range(1, 3):
+            await context.page.goto(f'https://webscraper.io/test-sites/e-commerce/static/computers/laptops?page={page_num}')
+            product_cards = await context.page.query_selector_all('.col-md-4.col-xl-4.col-lg-4')
+            for card in product_cards:
+                name = await card.query_selector('.title')
+                description = await card.query_selector('.description.card-text')
+                price = await card.query_selector('.price span')
 
-            count = await products.count()
-            for index in range(count):
-                product = products.nth(index)
-                name = await product.locator('.title').inner_text()
-                description = await product.locator('.description.card-text').inner_text()
-                price_text = await product.locator('.price span').inner_text()
-                price = float(price_text.replace('$', '').replace(',', ''))
-                
+                name_text = await name.inner_text()
+                description_text = await description.inner_text()
+                price_text = await price.inner_text()
+
                 items.append({
-                    'name': name,
-                    'description': description,
-                    'price': price
+                    'name': name_text,
+                    'description': description_text,
+                    'price': float(price_text.replace('$', ''))
                 })
-                
-            if page < 2:
-                next_page_link = f'https://webscraper.io/test-sites/e-commerce/static/computers/laptops?page={page + 1}'
-                await context.page.goto(next_page_link)
 
         data = {'items': items}
         
         await context.push_data(data)
         
-    await crawler.run(['https://webscraper.io/test-sites/e-commerce/static/computers/laptops'])
+    await crawler.run(['https://webscraper.io/test-sites/e-commerce/static/computers/laptops?page=1'])
 
 
 if __name__ == '__main__':

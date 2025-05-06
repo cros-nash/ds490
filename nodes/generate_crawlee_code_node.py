@@ -256,7 +256,6 @@ class GenerateCodeNode(BaseNode):
                 try:
                     output_lines = []
                     for line in proc.stdout:
-                        print(line, end="")
                         output_lines.append(line)
                     
                     proc.wait(timeout=60)
@@ -315,8 +314,6 @@ class GenerateCodeNode(BaseNode):
 
             chain = query_rewrite_prompt | self.llm_model | StrOutputParser()
             vector_query = chain.invoke({})
-
-            print(f"Generated execution error vector search query: {vector_query}")
 
             embedder = self.node_config.get("embedder_model") or OpenAIEmbeddings()
             query_vector = embedder.embed_query(vector_query)
@@ -408,8 +405,6 @@ class GenerateCodeNode(BaseNode):
             
             chain = query_rewrite_prompt | self.llm_model | StrOutputParser()
             vector_query = chain.invoke({})
-
-            print(f"Generated validation error vector search query: {vector_query}")
 
             embedder = self.node_config.get("embedder_model") or OpenAIEmbeddings()
             query_vector = embedder.embed_query(vector_query)
@@ -503,8 +498,6 @@ class GenerateCodeNode(BaseNode):
         output_parser = StrOutputParser()
         chain = query_rewrite_prompt | self.llm_model | output_parser
         vector_query = chain.invoke({})
-        
-        print(vector_query)
         
         embedder = self.node_config.get("embedder_model") or OpenAIEmbeddings()
         query_vector = embedder.embed_query(vector_query)
