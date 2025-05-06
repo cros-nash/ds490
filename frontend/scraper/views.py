@@ -280,13 +280,11 @@ def update_log(result_id, message):
     except Exception as e:
         print(f"Error updating log: {e}")
 
-def containerize_script(
-        script_path, 
-        output_dir=None, image_name=None):
+def containerize_script(script_path, output_dir=None, image_name=None):
     """Wrapper for the Containerizer class"""
+    full_script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), f'../../{script_path}'))
     try:
-        containerizer = Containerizer(script_path, output_dir, image_name)
-        
+        containerizer = Containerizer(full_script_path, output_dir, image_name)
         if containerizer.containerize():
             print(f"\nContainerization complete. \nRun your container using:")
             print(f"docker run {containerizer.image_name}")
