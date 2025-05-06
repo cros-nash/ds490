@@ -22,7 +22,10 @@ for _dir_ in [_cd_, os.path.join(_cd_, "..")]:
         sys.path.append(_dir_)
 del _cd_
 
-from .script_generator import generate_script as generate_script_with_llm
+from .script_generator import dynamic_model_from_fields, load_code_generator_graph
+import io, contextlib
+from pydantic import create_model
+from typing import List
 from container import Containerizer
 
 
@@ -358,70 +361,31 @@ print(result)
     return template
 
 def process_script_generation(result, project, api_key):
-    """Process script generation and containerization in a background thread"""
-    temp_dir = tempfile.mkdtemp()
-    script_path = os.path.join(temp_dir, f'scraper_{project.id}.py')
-    
+    """Run the CodeGeneratorGraph test script via subprocess and capture output"""
+    # Determine repository root (three levels up: scraper -> frontend -> repo root)
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    # Path to the test script that exercises CodeGeneratorGraph
+    test_script = os.path.join(project_root, 'test.py')
+    update_log(result.id, "Starting CodeGeneratorGraph test via subprocess...\n")
     try:
-        # Prepare project data for script generation
-        project_data = {
-            'name': project.name,
-            'website': project.website,
-            'llm_input': project.llm_input,
-            'respect_robots': project.respect_robots,
-            'pagination': project.pagination,
-            'delay': project.delay,
-            'max_pages': project.max_pages,
-            'timeout': project.timeout,
-            'user_agent': project.user_agent,
-            'verbose_logging': project.verbose_logging,
-            'download_html': project.download_html,
-            'screenshot': project.screenshot,
-            'output_format': project.output_format,
-            'field_specifications': []
-        }
-        
-        # Add field specifications
-        for field in project.field_specifications.all():
-            project_data['field_specifications'].append({
-                'field_name': field.field_name,
-                'field_type': field.field_type,
-                'description': field.description
-            })
-        
-        # Define log callback function to update logs in real-time
-        def log_callback(message):
-            update_log(result.id, message)
-        
-        # Generate script using LLM
-        try:
-            script_content = generate_script_with_llm(project_data, api_key, log_callback)
-            
-            # Write script to file
-            with open(script_path, 'w') as f:
-                f.write(script_content)
-            
-            update_log(result.id, "Script generated successfully.\nStarting containerization process...\n")
-            
-            # Containerize the script
-            containerization_result = containerize_script(script_path)
-            
-            if containerization_result.get('success', False):
-                update_log(result.id, f"Containerization successful. Container image: {containerization_result.get('image_name')}\n")
-                result.result_data = script_content
-                result.status = 'completed'
-            else:
-                error_message = containerization_result.get('error', 'Unknown error during containerization')
-                update_log(result.id, f"Containerization failed: {error_message}\n")
-                result.status = 'failed'
-            
-        except Exception as e:
-            update_log(result.id, f"Error during script generation: {str(e)}\n")
-            result.status = 'failed'
-            
+        # Execute the test.py script in the project root
+        proc = subprocess.run(
+            [sys.executable, test_script],
+            cwd=project_root,
+            capture_output=True,
+            text=True
+        )
+        # Log stdout and stderr
+        if proc.stdout:
+            update_log(result.id, "STDOUT:\n" + proc.stdout + "\n")
+        if proc.stderr:
+            update_log(result.id, "STDERR:\n" + proc.stderr + "\n")
+        # Save result data as stdout
+        result.result_data = proc.stdout
+        # Determine status
+        result.status = 'completed' if proc.returncode == 0 else 'failed'
         result.save()
-        
     except Exception as e:
-        update_log(result.id, f"Unexpected error: {str(e)}\n")
+        update_log(result.id, f"Subprocess error during graph test: {e}\n")
         result.status = 'failed'
         result.save()

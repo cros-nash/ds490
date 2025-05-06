@@ -1,3 +1,28 @@
+Metadata-Version: 2.4
+Name: ds490
+Version: 0.1.0
+Summary: DS490 smart scraper pipeline
+Home-page: https://github.com/yourusername/ds490
+Author: Your Name
+Author-email: you@example.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: pydantic>=1.10.0
+Requires-Dist: langchain>=0.0.1
+Requires-Dist: scrapegraphai>=0.1.0
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
 # Automatic Web Scraper Generator
 
 **A tool for journalists and non-technical users to generate Python scraping scripts from URL.**
@@ -28,7 +53,7 @@ cd ds490/main
 ```
 ### 2. Install Dependencies
 ```bash
-pip install -e .
+pip install -r requirements.txt
 ```
 ### 3. Configure Environment Variables
 Create a  `.env` file and add your OpenAI API key:
