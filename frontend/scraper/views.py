@@ -230,7 +230,7 @@ def get_logs(request, result_id):
 
 @login_required
 def download_container(request, result_id):
-    result = get_object_or_404(ScrapingResult, pk=result_id, project__user=request.user
+    result = get_object_or_404(ScrapingResult, pk=result_id, project__user=request.user)
     # Check if we have a containerized script
     if not result.status == 'completed':
         messages.error(request, 'Container is not ready for download yet.')
