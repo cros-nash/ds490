@@ -34,7 +34,7 @@ dill==0.4.0
 distro==1.9.0
 Django==5.2
 django-widget-tweaks==1.5.0
--e git+https://github.com/cros-nash/ds490.git@e40064b2fe33b6ba9e423e745059f6c0fad5031d#egg=ds490
+-e git+https://github.com/cros-nash/ds490.git@1b48bfe229c03674dc1f44c634aa9aac3ce691dd#egg=ds490
 duckduckgo_search==8.0.1
 emoji==2.14.1
 eval_type_backport==0.2.2

@@ -17,7 +17,6 @@ import time
 import sys
 import zipfile
 
-from .script_generator import dynamic_model_from_fields, load_code_generator_graph
 from django.conf import settings
 import io, contextlib
 from pydantic import create_model
@@ -351,10 +350,6 @@ def generate_python_script_template(project):
         clean_name = fs.field_name.strip()
         clean_desc = fs.description.replace("'", "\\'").replace("\n", " ").replace("\r", "").strip()
         record_fields.append(f"{INDENT}{clean_name}: {pytype} = Field(..., description='{clean_desc}')")
-        
-    for line in record_fields:
-        print(repr(line))
-
 
     if not record_fields:
         record_fields = ["    pass"]
@@ -393,9 +388,8 @@ if __name__ == "__main__":
         schema=RecordList
     )
 result = graph.run()
-print(result)
+print("Code generated successfully")
 '''
-    print(template)
     return template
 
 def process_script_generation(result, project, api_key):
