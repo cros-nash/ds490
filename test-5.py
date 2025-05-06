@@ -13,19 +13,12 @@ graph_config = {
     "llm": {
         "api_key": os.getenv('OPENAI_API_KEY'),
         "model": "openai/gpt-4o-mini",
-        "temperature" : 0,
+        "temperature" : 0.5,
         "top_p" : 1,
     },
     "verbose": True,
     "headless": False,
     "reduction": 2,
-    "max_iterations": {
-        "overall": 3,
-        "syntax": 3,
-        "execution": 3,
-        "validation": 3,
-        "semantic": 3,
-    },
     "output_file_name": "extracted_data.py",
 }
 

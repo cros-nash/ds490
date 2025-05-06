@@ -13,17 +13,12 @@ graph_config = {
     "llm": {
         "api_key": os.getenv('OPENAI_API_KEY'),
         "model": "openai/gpt-4o",
+        "temperature" : 1,
+        "top_p" : 1,
     },
     "verbose": True,
     "headless": False,
     "reduction": 2,
-    "max_iterations": {
-        "overall": 3,
-        "syntax": 3,
-        "execution": 3,
-        "validation": 3,
-        "semantic": 3,
-    },
     "output_file_name": "extracted_data.py",
 }
 
@@ -38,6 +33,7 @@ class Table(BaseModel):
     total_cash: str = Field(description="Total cash on hand at the end of the reporting period for the party's candidates")
     total_pacs: str = Field(description="Total contributions received from Political Action Committees (PACs) by the party's candidates")
     total_individuals: str = Field(description="Total contributions received from individual donors by the party's candidates")
+    
 class Tables(BaseModel):
     tables: List[Table]
 

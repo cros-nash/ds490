@@ -294,26 +294,48 @@ class GenerateCodeNode(BaseNode):
                 except Exception:
                     pass
 
-            analysis_text = execution_focused_analysis(state, self.llm_model)
-            query = state["html_analysis"] + " Execution errors: " + " ".join(err)
-            client = state["vectorial_db"]
+            execution_error_text = "\n".join(state["errors"]["execution"])
+
+            query_rewrite_prompt = PromptTemplate(
+                template=(
+                    '''
+                    Given the following context:\n\n
+                    - html analysis: \n{html_analysis}\n
+                    - execution error: \n{execution_error}\n\n
+                    Write a concise technical query (max 1-2 sentences) that retrieves relevant documentation or code examples \
+                    from a vector database that stores Python web scraping library (Crawlee) documentation. This will be used to help a LLM resolve an error that occured during execution. \
+                    The query must be Only return the prompt as it will be directly used as a query for the database.
+                    '''
+                ),
+                partial_variables={
+                    "html_analysis": state["html_analysis"],
+                    "execution_error": execution_error_text,
+                },
+            )
+
+            chain = query_rewrite_prompt | self.llm_model | StrOutputParser()
+            vector_query = chain.invoke({})
+
+            print(f"Generated execution error vector search query: {vector_query}")
+
             embedder = self.node_config.get("embedder_model") or OpenAIEmbeddings()
-            query_vector = embedder.embed_query(query)
-            print(query)
-            print('\n\nreached hits')
+            query_vector = embedder.embed_query(vector_query)
+            client = state["vectorial_db"]
             hits = client.search(
                 collection_name="vectorial_collection",
                 query_vector=query_vector,
                 limit=self.execution_k,
             )
-            print('\n\nat snippets')
             snippets = [h.payload.get("text", "") for h in hits]
+
             crawlee_snippet = (
-                "\n\n*HITS FROM VECTOR DATABASE USING HTML ANALYSIS AND EXECUTION ERRORS AS QUERY*:\n"
+                f"\n\n*HITS FROM VECTOR DATABASE (QUERY: '{vector_query}')*:\n"
                 + "\n\n".join(snippets)
             )
+
+            analysis_text = execution_focused_analysis(state, self.llm_model)
             analysis = f"{crawlee_snippet}\n\n{analysis_text}"
-            
+
             self.logger.info("--- (Regenerating Code to fix the Error) ---")
             state["generated_code"] = execution_focused_code_generation(state, analysis, self.llm_model)
             state["generated_code"] = extract_code(state["generated_code"])
@@ -364,22 +386,47 @@ class GenerateCodeNode(BaseNode):
             self.logger.info(
                 "--- (Code Output not compliant to the desired Output Schema) ---"
             )
+            
+            validation_error_text = "\n".join(state["errors"]["validation"])
 
-            analysis_text = validation_focused_analysis(state, self.llm_model)
-            query = state["html_analysis"] + " Validation errors: " + " ".join(errors)
-            client = state["vectorial_db"]
+            query_rewrite_prompt = PromptTemplate(
+                template=(
+                    '''
+                    Given the following context:\n\n
+                    - html analysis: \n{html_analysis}\n
+                    - validation error: \n{validation_error}\n\n
+                    Write a concise technical query (max 1-2 sentences) that retrieves relevant documentation or code examples \
+                    from a vector database that stores Python web scraping library (Crawlee) documentation. This will be used to help a LLM resolve an error that occured during execution. \
+                    The query must be Only return the prompt as it will be directly used as a query for the database.
+                    '''
+                ),
+                partial_variables={
+                    "html_analysis": state["html_analysis"],
+                    "validation_error": validation_error_text,
+                },
+            )
+            
+            chain = query_rewrite_prompt | self.llm_model | StrOutputParser()
+            vector_query = chain.invoke({})
+
+            print(f"Generated validation error vector search query: {vector_query}")
+
             embedder = self.node_config.get("embedder_model") or OpenAIEmbeddings()
-            query_vector = embedder.embed_query(query)
+            query_vector = embedder.embed_query(vector_query)
+            client = state["vectorial_db"]
             hits = client.search(
                 collection_name="vectorial_collection",
                 query_vector=query_vector,
                 limit=self.validation_k,
             )
             snippets = [h.payload.get("text", "") for h in hits]
+
             crawlee_snippet = (
-                "\n\n*HITS FROM VECTOR DATABASE USING HTML ANALYSIS AND VALIDATION ERRORS AS QUERY*:\n"
+                f"\n\n*HITS FROM VECTOR DATABASE (QUERY: '{vector_query}')*:\n"
                 + "\n\n".join(snippets)
             )
+            
+            analysis_text = validation_focused_analysis(state, self.llm_model)
             analysis = f"{crawlee_snippet}\n\n{analysis_text}"
 
             self.logger.info(
@@ -431,24 +478,54 @@ class GenerateCodeNode(BaseNode):
 
     def generate_initial_code(self, state: dict) -> str:
         """
-        Generates the initial code based on the provided state.
+        Generates the initial code based on the provided state, using LLM-assisted query rewriting for vector search.
         """
 
-        query = state.get("html_analysis", "")
-        client = state["vectorial_db"]
-        embedder = self.node_config.get("embedder_model") or OpenAIEmbeddings()
+        # Step 1: Have the LLM generate a query string for the vector DB
+        query_rewrite_prompt = PromptTemplate(
+            template=(
+                '''
+                Given the following:\n\n
+                - user prompt: \n{user_input}\n
+                - html analysis: \n{html_analysis}\n
+                - json schema: \n{json_schema}\n\n
+                Write a concise technical query (max 1-2 sentences) that retrieves relevant documentation or code examples \
+                from a vector database that stores Python web scraping library (Crawlee) documentation. This will be used to help a LLM generate a scraping function. \
+                The query must be Only return the prompt as it will be directly used as a query for the database.
+                '''
+            ),
+            partial_variables={
+                "user_input"        : state["user_input"], 
+                "html_analysis"     : state["html_analysis"], 
+                "json_schema"       : state["json_schema"]
+                },
+        )
+        
+        output_parser = StrOutputParser()
+        chain = query_rewrite_prompt | self.llm_model | output_parser
+        vector_query = chain.invoke({})
+        
+        print(vector_query)
 
-        query_vector = embedder.embed_query(query)
+        # Step 2: Embed and search with the generated query
+        embedder = self.node_config.get("embedder_model") or OpenAIEmbeddings()
+        query_vector = embedder.embed_query(vector_query)
+        client = state["vectorial_db"]
         hits = client.search(
             collection_name="vectorial_collection",
             query_vector=query_vector,
             limit=self.initial_k,
         )
         snippets = [h.payload.get("text", "") for h in hits]
+
+        # Step 3: Inject retrieved docs into the prompt
         crawlee_snippet = (
-            "\n\n*HITS FROM VECTOR DATABASE USING HTML ANALYSIS AS QUERY*:\n"
+            "\n\n*HITS FROM VECTOR DATABASE (QUERY: '{}')*:\n".format(vector_query)
             + "\n\n".join(snippets)
         )
+        
+        print("GEN_INITIAL_CODE", crawlee_snippet, "\n\n\n")
+
         prompt = PromptTemplate(
             template=DEFAULT_CRAWLEE_TEMPLATE,
             partial_variables={
@@ -463,7 +540,9 @@ class GenerateCodeNode(BaseNode):
         output_parser = StrOutputParser()
         chain = prompt | self.llm_model | output_parser
         generated_code = chain.invoke({})
+
         return generated_code
+
 
     def semantic_comparison(
         self, generated_result: Any, reference_result: Any
