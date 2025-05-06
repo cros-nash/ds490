@@ -230,19 +230,81 @@ def download_container(request, result_id):
 
 # helper functions
 def generate_python_script(project):
+    """
+    Generate a Python script that uses CodeGeneratorGraph to produce
+    scraping code based on project settings and field specifications.
+    """
+    from .models import APIKey
+    import json
 
-    schema = {}
-    for field in project.field_specifications.all():
-        schema[field.field_name] = {
-            "type": field.field_type,
-            "description": field.description
-        }
-    
-    # TODO: return scrapegraph script
+    # Retrieve API key
+    try:
+        api_key = APIKey.objects.get(user=project.user).key
+    except APIKey.DoesNotExist:
+        raise ValueError("API key not found for user")
 
-    return NotImplemented
+    # Prepare field specs
+    specs = list(project.field_specifications.all())
+    # Decide extra imports
+    needs_datetime = any(fs.field_type == "date" for fs in specs)
+    needs_any = any(fs.field_type == "list" for fs in specs)
+
+    # Build the Record class fields
+    type_map = {
+        "str": "str",
+        "int": "int",
+        "float": "float",
+        "bool": "bool",
+        "date": "datetime.date",
+        "list": "List[Any]",
+        "dict": "dict",
+    }
+    record_fields = []
+    for fs in specs:
+        pytype = type_map.get(fs.field_type, "str")
+        desc = fs.description.replace("'", "\\'")
+        record_fields.append(f"    {fs.field_name}: {pytype} = Field(..., description='{desc}')")
+    if not record_fields:
+        record_fields = ["    pass"]
+
+    # Template for the script
+    template = f'''\
+import os
+os.environ["OPENAI_API_KEY"] = "{api_key}"
+from pydantic import BaseModel, Field
+from typing import List{", Any" if needs_any else ""}
+{"import datetime" if needs_datetime else ""}
+from code_generator_graph import CodeGeneratorGraph
+
+graph_config = {{
+"llm": {{
+    "api_key": os.getenv("OPENAI_API_KEY"),
+    "model": "openai/gpt-4o-mini"
+}},
+"verbose": {project.verbose_logging},
+"headless": False
+}}  
+
+class Record(BaseModel):
+    {chr(10).join(record_fields)}
+
+class RecordList(BaseModel):
+    records: List[Record]
+
+if __name__ == "__main__":
+    graph = CodeGeneratorGraph(
+        prompt={json.dumps(project.llm_input)},
+        source={json.dumps(project.website)},
+        config=graph_config,
+        schema=RecordList
+    )
+result = graph.run()
+print(result)
+'''
+    return template
 
 def process_script_generation(result, script_content, project):
+    
     """Process script generation and containerization in a background thread"""
     # Create a temporary file for the script
     temp_dir = tempfile.mkdtemp()
@@ -262,54 +324,22 @@ def process_script_generation(result, script_content, project):
         result.log_output += "Analyzing dependencies...\n"
         result.save()
         
-        # Simulate containerization process
-        time.sleep(2)
-        
-        # Update log
-        result.log_output += "Dependencies identified: requests, beautifulsoup4, pandas\n"
-        result.log_output += "Creating Containerfile...\n"
+        # Run the generated script to produce code
+        result.log_output += "Running code generator script...\n"
         result.save()
-        
-        # Simulate more processing
-        time.sleep(2)
-        
-        # Update log with container file content
-        container_file = f"""FROM python:3.9
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY scraper_{project.id}.py .
-CMD ["python", "scraper_{project.id}.py"]"""
-        
-        result.log_output += "Containerfile created:\n"
-        result.log_output += container_file + "\n\n"
-        result.log_output += "Building container image...\n"
-        result.save()
-        
-        # Simulate building container
-        time.sleep(3)
-        
-        # Update log
-        result.log_output += "Container built successfully.\n"
-        result.log_output += "Container image tag: scraper-" + str(project.id) + "\n"
-        result.log_output += "Ready for download or execution.\n"
-        
-        # Set example result data
-        sample_data = [
-            {"text": "Home", "url": "/"},
-            {"text": "About", "url": "/about"},
-            {"text": "Contact", "url": "/contact"}
-        ]
-        
-        if project.output_format == 'json':
-            result.result_data = json.dumps(sample_data, indent=2)
-        else:
-            # Convert to CSV format as a string
-            csv_data = "text,url\n"
-            for item in sample_data:
-                csv_data += f"{item['text']},{item['url']}\n"
-            result.result_data = csv_data
-        
+        # Execute the script and capture output
+        proc = subprocess.run(
+            ["python", script_path],
+            cwd=temp_dir,
+            capture_output=True,
+            text=True
+        )
+        # Log stdout and stderr
+        result.log_output += proc.stdout or ''
+        if proc.stderr:
+            result.log_output += "Errors during generation:\n" + proc.stderr + "\n"
+        # Save generated code as result data and mark completion
+        result.result_data = proc.stdout or ''
         result.status = 'completed'
         result.save()
         
