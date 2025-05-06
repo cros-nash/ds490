@@ -6,7 +6,7 @@
 <div class="row">
     <div class="col-md-12">
         <h1>Generating Script</h1>
-        <a href="{% url 'project_detail' result.project.id %}" class="btn btn-secondary mb-3">Cancel</a>
+        <a href="{% url 'project_detail' result.project.id %}" class="btn btn-secondary mb-3">Back to Project</a>
         
         <div class="progress mb-3">
             <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
@@ -15,11 +15,14 @@
         <div class="row">
             <div class="col-md-8">
                 <div class="card mb-4">
-                    <div class="card-header">
-                        <h5>Logs</h5>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Log Output</h5>
+                        <div>
+                            <button id="autoscroll-toggle" class="btn btn-sm btn-outline-secondary">Autoscroll: ON</button>
+                        </div>
                     </div>
                     <div class="card-body">
-                        <pre id="log-output" class="bg-dark text-light p-3" style="height: 300px; overflow-y: auto;"></pre>
+                        <pre id="log-output" class="bg-dark text-light p-3" style="height: 500px; overflow-y: auto; font-family: 'Courier New', monospace;"></pre>
                     </div>
                 </div>
             </div>
@@ -30,16 +33,16 @@
                         <h5>Generated Script</h5>
                     </div>
                     <div class="card-body">
-                        <pre id="script-preview" class="bg-dark text-light p-3" style="height: 300px; overflow-y: auto;">
+                        <pre id="script-preview" class="bg-dark text-light p-3" style="height: 500px; overflow-y: auto; font-family: 'Courier New', monospace;">
 # Python script will appear here once generated
-# ...
-                        </pre>
+</pre>
                     </div>
                 </div>
                 
                 <div id="action-buttons" class="text-center mb-4">
                     <button id="download-btn" class="btn btn-primary me-2" disabled>Download Container</button>
                     <button id="run-btn" class="btn btn-success" disabled>Run Container</button>
+                    <div class="mt-2" id="status-message"></div>
                 </div>
             </div>
         </div>
@@ -51,38 +54,87 @@
 <script>
     // JavaScript to poll for logs and update UI
     let progressValue = 0;
+    let autoScroll = true;
+    let lastLogLength = 0;
     const progressBar = document.getElementById('progress-bar');
     const logOutput = document.getElementById('log-output');
+    const scriptPreview = document.getElementById('script-preview');
     const downloadBtn = document.getElementById('download-btn');
     const runBtn = document.getElementById('run-btn');
+    const statusMessage = document.getElementById('status-message');
+    const autoscrollToggle = document.getElementById('autoscroll-toggle');
+    
+    // Toggle autoscroll
+    autoscrollToggle.addEventListener('click', function() {
+        autoScroll = !autoScroll;
+        this.textContent = `Autoscroll: ${autoScroll ? 'ON' : 'OFF'}`;
+    });
     
     function updateProgress(value) {
         progressValue = value;
         progressBar.style.width = `${value}%`;
+        
+        if (value === 100) {
+            progressBar.classList.remove('progress-bar-animated');
+        }
+    }
+    
+    function updateScriptPreview(log) {
+        // Look for python code blocks in the log
+        const pythonPattern = /```python\n([\s\S]*?)```/g;
+        const matches = [...log.matchAll(pythonPattern)];
+        
+        if (matches.length > 0) {
+            // Get the last match (most recent code block)
+            const latestMatch = matches[matches.length - 1];
+            scriptPreview.textContent = latestMatch[1].trim();
+        } else if (log.includes('Script generated successfully')) {
+            scriptPreview.textContent = '# Script has been generated but content is not available for preview.\n# You can download it using the button below.';
+        }
     }
     
     function pollLogs() {
         fetch('{% url "get_logs" result.id %}')
             .then(response => response.json())
             .then(data => {
-                logOutput.textContent = data.log;
-                logOutput.scrollTop = logOutput.scrollHeight;
+                // Check if there are new log entries
+                if (data.log.length > lastLogLength) {
+                    logOutput.textContent = data.log;
+                    lastLogLength = data.log.length;
+                    
+                    // Auto scroll to bottom if enabled
+                    if (autoScroll) {
+                        logOutput.scrollTop = logOutput.scrollHeight;
+                    }
+                    
+                    // Update script preview from logs if possible
+                    updateScriptPreview(data.log);
+                }
                 
+                // Update progress based on log content and status
                 if (data.status === 'running') {
                     // Update progress based on log content
-                    if (data.log.includes('Container built successfully')) {
+                    if (data.log.includes('Containerization successful')) {
                         updateProgress(100);
                         enableButtons();
-                    } else if (data.log.includes('Building container image')) {
+                        statusMessage.innerHTML = '<span class="text-success">Processing complete! Download or run the container.</span>';
+                    } else if (data.log.includes('Containerization failed')) {
+                        updateProgress(100);
+                        progressBar.classList.remove('bg-primary');
+                        progressBar.classList.add('bg-danger');
+                        statusMessage.innerHTML = '<span class="text-danger">Containerization failed. See logs for details.</span>';
+                    } else if (data.log.includes('Starting containerization')) {
                         updateProgress(75);
-                    } else if (data.log.includes('Creating Containerfile')) {
+                        statusMessage.innerHTML = '<span class="text-primary">Containerizing script...</span>';
+                    } else if (data.log.includes('Script generated successfully')) {
                         updateProgress(50);
-                    } else if (data.log.includes('Dependencies identified')) {
+                        statusMessage.innerHTML = '<span class="text-primary">Script generated, preparing container...</span>';
+                    } else if (data.log.includes('Generating script with LLM')) {
                         updateProgress(30);
-                    } else if (data.log.includes('Script file created')) {
-                        updateProgress(15);
+                        statusMessage.innerHTML = '<span class="text-primary">Generating script with AI...</span>';
                     } else {
-                        updateProgress(5);
+                        updateProgress(10);
+                        statusMessage.innerHTML = '<span class="text-primary">Initializing...</span>';
                     }
                     
                     // Continue polling
@@ -90,15 +142,18 @@
                 } else if (data.status === 'completed') {
                     updateProgress(100);
                     enableButtons();
+                    statusMessage.innerHTML = '<span class="text-success">Processing complete! Download or run the container.</span>';
                 } else {
                     // Failed status
                     progressBar.classList.remove('bg-primary');
                     progressBar.classList.add('bg-danger');
                     updateProgress(100);
+                    statusMessage.innerHTML = '<span class="text-danger">Process failed. See logs for details.</span>';
                 }
             })
             .catch(error => {
                 console.error('Error polling logs:', error);
+                statusMessage.innerHTML = '<span class="text-warning">Connection error, retrying...</span>';
                 setTimeout(pollLogs, 3000);  // retry with longer delay on error
             });
     }

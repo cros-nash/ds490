@@ -1,0 +1,75 @@
+# Automatic Web Scraper Generator
+
+**A tool for journalists and non-technical users to generate Python scraping scripts from URL.**
+
+## Overview
+This tool simplifies web scraping by allowing users to provide a prompt, URL, and desired of a website and automatically generating a **Python script** to extract the desired data. It combines **LLM (Large Language Model) analysis**, **containerized execution**, and **user-friendly input** to make scraping accessible without requiring coding expertise.
+
+### Key Features
+✅ **No-Code Scraping** – Generate scraping scripts just by providing a URL and prompt.  
+✅ **LLM-Powered Parsing** – Uses AI to intelligently identify and extract structured data.  
+✅ **Dockerized Environment** – Ensures consistent execution across different systems.  
+✅ **Customizable Output** – Supports CSV, JSON, or direct database storage.  
+✅ **User-Friendly CLI** – Simple commands to run and configure scrapers.  
+
+---
+
+## Installation & Setup
+
+### Prerequisites
+- Python 3.10+
+- Docker (for containerized execution)
+- OpenAI API key (for LLM processing)
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/cros-nash/ds490.git
+cd ds490/main
+```
+### 2. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+### 3. Configure Environment Variables
+Create a  `.env` file and add your OpenAI API key:
+```bash
+OPENAI_API_KEY=your_api_key_here
+```
+
+## Technical Stack
+### Core Language: Python 3.10+
+#### Web Scraping Libraries: BeautifulSoup4, Scrapy, Playwright
+#### AI Integration: OpenAI GPT models
+#### Containerization: Docker
+#### Data Formats: CSV, JSON, SQLite
+
+## Roadmap
+#### Add GUI interface
+#### Support for PDF inputs
+#### Multi-language output support
+#### Cloud deployment options
+
+## MIT License
+
+Copyright (c) [2025] [Crosby Nash, Inhye Kang, Claire Law, Andrew Botolino, Langdon White]
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files, to deal in the Software
+without restriction, including without limitation the rights to use, copy,
+modify, merge, publish, distribute, sublicense, and/or sell copies of the
+Software, and to permit persons to whom the Software is furnished to do so.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
+See full license text at: https://opensource.org/licenses/MIT
+
+## Creative Commons Attribution-NonCommercial 4.0
+
+You are free to:
+- Share — copy and redistribute the material
+- Adapt — remix, transform, and build upon the material
+
+Under these terms:
+- Attribution — You must give credit
+- NonCommercial — You may not use for commercial purposes
+
+See full license at: https://creativecommons.org/licenses/by-nc/4.0/
