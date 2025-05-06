@@ -16,21 +16,15 @@ import threading
 import time
 import sys
 
-# Import local modules
-from .script_generator import generate_script as generate_script_with_llm
+_cd_ = os.path.abspath(os.path.dirname(__file__))
+for _dir_ in [_cd_, os.path.join(_cd_, "..")]:
+    if _dir_ not in sys.path:
+        sys.path.append(_dir_)
+del _cd_
 
-def load_containerizer():
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    module_path = os.path.join(project_root, 'containerizer.py')
-    
-    if not os.path.exists(module_path):
-        raise FileNotFoundError(f"Could not find containerizer.py at {module_path}")
-    
-    spec = importlib.util.spec_from_file_location("containerizer", module_path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    
-    return module.Containerizer
+from .script_generator import generate_script as generate_script_with_llm
+from container import Containerizer
+
 
 def signup(request):
     if request.method == 'POST':
@@ -265,18 +259,18 @@ def update_log(result_id, message):
 def containerize_script(script_path, output_dir=None, image_name=None):
     """Wrapper for the Containerizer class"""
     try:
-        # Dynamically load the Containerizer class
-        Containerizer = load_containerizer()
         containerizer = Containerizer(script_path, output_dir, image_name)
-        success = containerizer.containerize()
         
-        if success:
+        if containerizer.containerize():
+            print(f"\nContainerization complete. \nRun your container using:")
+            print(f"docker run {containerizer.image_name}")
             return {
                 'success': True,
                 'image_name': containerizer.image_name,
                 'output_dir': str(containerizer.output_dir)
             }
         else:
+            print("\nContainerization failed. Please check the errors above.")
             return {
                 'success': False,
                 'error': 'Containerization failed'
@@ -286,7 +280,7 @@ def containerize_script(script_path, output_dir=None, image_name=None):
             'success': False,
             'error': str(e)
         }
-# helper functions
+
 def generate_python_script(project):
     """
     Generate a Python script that uses CodeGeneratorGraph to produce
