@@ -360,21 +360,22 @@ def process_script_generation(result, project, api_key):
     # Determine repository root (three levels up: scraper -> frontend -> repo root)
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     # Path to the test script that exercises CodeGeneratorGraph
-    test_script = os.path.join(project_root, 'test.py')
+    test_script = project_root+"/tests/test.py"
     update_log(result.id, "Starting CodeGeneratorGraph test via subprocess...\n")
     try:
         # Execute the test.py script in the project root
-        proc = subprocess.run(
+        proc = subprocess.Popen(
             [sys.executable, test_script],
             cwd=project_root,
-            capture_output=True,
-            text=True
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1
         )
-        # Log stdout and stderr
-        if proc.stdout:
-            update_log(result.id, "STDOUT:\n" + proc.stdout + "\n")
-        if proc.stderr:
-            update_log(result.id, "STDERR:\n" + proc.stderr + "\n")
+        
+        for line in proc.stdout:
+            update_log(result.id, line)
+
         # Save result data as stdout
         result.result_data = proc.stdout
         # Determine status
