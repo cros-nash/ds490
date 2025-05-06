@@ -16,17 +16,12 @@ import threading
 import time
 import sys
 
-_cd_ = os.path.abspath(os.path.dirname(__file__))
-for _dir_ in [_cd_, os.path.join(_cd_, "..")]:
-    if _dir_ not in sys.path:
-        sys.path.append(_dir_)
-del _cd_
 
 from .script_generator import dynamic_model_from_fields, load_code_generator_graph
 import io, contextlib
 from pydantic import create_model
 from typing import List
-from container import Containerizer
+from scripts.container import Containerizer
 
 
 def signup(request):
