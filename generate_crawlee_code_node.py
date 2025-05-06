@@ -177,17 +177,17 @@ class GenerateCodeNode(BaseNode):
             if state["errors"]["execution"]:
                 continue
 
-            self.logger.info("--- (Validate the Code Output Schema) ---")
-            state = self.validation_reasoning_loop(state)
-            if state["errors"]["validation"]:
-                continue
+            # self.logger.info("--- (Validate the Code Output Schema) ---")
+            # state = self.validation_reasoning_loop(state)
+            # if state["errors"]["validation"]:
+            #     continue
 
-            self.logger.info(
-                """--- (Checking if the informations exctrcated are the ones Requested) ---"""
-            )
-            state = self.semantic_comparison_loop(state)
-            if state["errors"]["semantic"]:
-                continue
+            # self.logger.info(
+            #     """--- (Checking if the informations exctrcated are the ones Requested) ---"""
+            # )
+            # state = self.semantic_comparison_loop(state)
+            # if state["errors"]["semantic"]:
+            #     continue
             break
 
         if state["iteration"] == self.max_iterations["overall"] and (
@@ -426,8 +426,8 @@ class GenerateCodeNode(BaseNode):
                 + "\n\n".join(snippets)
             )
             
-            analysis_text = validation_focused_analysis(state, self.llm_model)
-            analysis = f"{crawlee_snippet}\n\n{analysis_text}"
+            analysis = validation_focused_analysis(state, self.llm_model)
+            # analysis = f"{crawlee_snippet}\n\n{analysis_text}"
 
             self.logger.info(
                 "--- (Regenerating Code to make the Output compliant) ---"
@@ -481,7 +481,6 @@ class GenerateCodeNode(BaseNode):
         Generates the initial code based on the provided state, using LLM-assisted query rewriting for vector search.
         """
 
-        # Step 1: Have the LLM generate a query string for the vector DB
         query_rewrite_prompt = PromptTemplate(
             template=(
                 '''
@@ -506,8 +505,7 @@ class GenerateCodeNode(BaseNode):
         vector_query = chain.invoke({})
         
         print(vector_query)
-
-        # Step 2: Embed and search with the generated query
+        
         embedder = self.node_config.get("embedder_model") or OpenAIEmbeddings()
         query_vector = embedder.embed_query(vector_query)
         client = state["vectorial_db"]
@@ -518,13 +516,10 @@ class GenerateCodeNode(BaseNode):
         )
         snippets = [h.payload.get("text", "") for h in hits]
 
-        # Step 3: Inject retrieved docs into the prompt
         crawlee_snippet = (
             "\n\n*HITS FROM VECTOR DATABASE (QUERY: '{}')*:\n".format(vector_query)
             + "\n\n".join(snippets)
         )
-        
-        print("GEN_INITIAL_CODE", crawlee_snippet, "\n\n\n")
 
         prompt = PromptTemplate(
             template=DEFAULT_CRAWLEE_TEMPLATE,

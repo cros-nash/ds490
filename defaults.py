@@ -11,7 +11,7 @@ NODE_DEFAULTS = {
         # number of top snippets to retrieve for execution error analysis
         "execution_k": 12,
         # number of top snippets to retrieve for validation error analysis
-        "validation_k": 12,
+        "validation_k": 4,
     },
     # Default iteration counts for reasoning loops
     "max_iterations": {

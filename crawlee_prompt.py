@@ -70,9 +70,7 @@ if __name__ == '__main__':
 3. **Do not** reformat or rewrite lines outside the placeholders.
 4. **Return *only* the fully-filled Python file** (no back-ticks, headings, or commentary).
 5. The `max_requests_per_crawl` must always be set to 500.
-6. If the page uses <select> dropdowns to filter results, do not try to emulate clicks. Instead, extract the <option> values and programmatically build the corresponding URLs (e.g. by plugging each option into the query string) and crawl those.
-7. Do not try to import additional modules
-8. When you need combinations of filters (e.g. multiple dropdowns), use `itertools.product` to generate Cartesian products of option values.
+6. Do not try to import additional modules
 
 *If a placeholder is not needed, delete the whole `{{ … }}` token and leave that spot blank.*
 

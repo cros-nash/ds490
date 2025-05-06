@@ -2,3 +2,4 @@
 .env
 .node_cache/*
 storage/*
+langchain-docusaurus.ipynb
