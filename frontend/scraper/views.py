@@ -256,7 +256,9 @@ def update_log(result_id, message):
     except Exception as e:
         print(f"Error updating log: {e}")
 
-def containerize_script(script_path, output_dir=None, image_name=None):
+def containerize_script(
+        script_path, 
+        output_dir=None, image_name=None):
     """Wrapper for the Containerizer class"""
     try:
         containerizer = Containerizer(script_path, output_dir, image_name)
