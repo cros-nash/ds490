@@ -10,9 +10,28 @@ from .forms import ProjectForm, APIKeyForm, CustomUserCreationForm, FieldSpecifi
 import json
 import os
 import tempfile
+import importlib.util
 import subprocess
 import threading
 import time
+import sys
+
+# Import local modules
+from .script_generator import generate_script as generate_script_with_llm
+
+def load_containerizer():
+    """Dynamically load Containerizer from project root"""
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    module_path = os.path.join(project_root, 'containerizer.py')
+    
+    if not os.path.exists(module_path):
+        raise FileNotFoundError(f"Could not find containerizer.py at {module_path}")
+    
+    spec = importlib.util.spec_from_file_location("containerizer", module_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    
+    return module.Containerizer
 
 def signup(request):
     if request.method == 'POST':
@@ -25,7 +44,7 @@ def signup(request):
         form = CustomUserCreationForm()
     return render(request, 'scraper/signup.html', {'form': form})
 
-@login_required         # restricts acesss to logged-in users only
+@login_required
 def api_key(request):
     try:
         api_key = APIKey.objects.get(user=request.user)
@@ -166,20 +185,28 @@ def add_field_specification(request):
 @login_required
 def generate_script(request, pk):
     project = get_object_or_404(Project, pk=pk, user=request.user)
-    # Create script template based on project settings
-    script_content = generate_python_script(project)
+    
+    try:
+        api_key = APIKey.objects.get(user=request.user)
+    except APIKey.DoesNotExist:
+        messages.error(request, 'You need to set up your API key first.')
+        return redirect('api_key')
+    
     # Create a new result
     result = ScrapingResult.objects.create(
         project=project,
         status='running',
-        log_output='Initializing...\n'
+        log_output='Initializing script generation...\n'
     )
+    
     # Start the script generation and containerization in a separate thread
     thread = threading.Thread(
         target=process_script_generation,
-        args=(result, script_content, project)
+        args=(result, project, api_key.key)
     )
+    thread.daemon = True
     thread.start()
+    
     return redirect('execution_status', result_id=result.id)
 
 @login_required
@@ -213,108 +240,120 @@ def get_logs(request, result_id):
 
 @login_required
 def download_container(request, result_id):
-    # Logic to create a downloadable container file
-    # This would typically create a tarball of the Docker image
-    # For simplicity, we're just returning a text file
-    response = HttpResponse(content_type='application/text')
-    response['Content-Disposition'] = f'attachment; filename="docker_commands.txt"'
-    
     result = get_object_or_404(ScrapingResult, pk=result_id, project__user=request.user)
-    project = result.project
     
-    response.write(f"# Docker commands to run your scraper\n\n")
-    response.write(f"# Pull the image\ndocker pull scraper-{project.id}\n\n")
-    response.write(f"# Run the container\ndocker run scraper-{project.id}\n")
+    # Check if we have a containerized script
+    if not result.status == 'completed':
+        messages.error(request, 'Container is not ready for download yet.')
+        return redirect('execution_status', result_id=result.id)
+    
+    # In a real implementation, we would create a downloadable Docker image
+    # For now, we'll just return the script as a downloadable file
+    response = HttpResponse(content_type='text/plain')
+    response['Content-Disposition'] = f'attachment; filename="scraper_{result.project.id}.py"'
+    response.write(result.result_data)
     
     return response
 
-# helper functions
-def generate_python_script(project):
+def update_log(result_id, message):
+    """Update the log output for a result"""
+    try:
+        result = ScrapingResult.objects.get(pk=result_id)
+        result.log_output += message
+        result.save()
+    except Exception as e:
+        print(f"Error updating log: {e}")
 
-    schema = {}
-    for field in project.field_specifications.all():
-        schema[field.field_name] = {
-            "type": field.field_type,
-            "description": field.description
+def containerize_script(script_path, output_dir=None, image_name=None):
+    """Wrapper for the Containerizer class"""
+    try:
+        # Dynamically load the Containerizer class
+        Containerizer = load_containerizer()
+        containerizer = Containerizer(script_path, output_dir, image_name)
+        success = containerizer.containerize()
+        
+        if success:
+            return {
+                'success': True,
+                'image_name': containerizer.image_name,
+                'output_dir': str(containerizer.output_dir)
+            }
+        else:
+            return {
+                'success': False,
+                'error': 'Containerization failed'
+            }
+    except Exception as e:
+        return {
+            'success': False,
+            'error': str(e)
         }
-    
-    # TODO: return scrapegraph script
 
-    return NotImplemented
-
-def process_script_generation(result, script_content, project):
+def process_script_generation(result, project, api_key):
     """Process script generation and containerization in a background thread"""
-    # Create a temporary file for the script
     temp_dir = tempfile.mkdtemp()
     script_path = os.path.join(temp_dir, f'scraper_{project.id}.py')
     
     try:
-        # Update log
-        result.log_output += "Creating script file...\n"
-        result.save()
+        # Prepare project data for script generation
+        project_data = {
+            'name': project.name,
+            'website': project.website,
+            'llm_input': project.llm_input,
+            'respect_robots': project.respect_robots,
+            'pagination': project.pagination,
+            'delay': project.delay,
+            'max_pages': project.max_pages,
+            'timeout': project.timeout,
+            'user_agent': project.user_agent,
+            'verbose_logging': project.verbose_logging,
+            'download_html': project.download_html,
+            'screenshot': project.screenshot,
+            'output_format': project.output_format,
+            'field_specifications': []
+        }
         
-        # Write script to file
-        with open(script_path, 'w') as f:
-            f.write(script_content)
+        # Add field specifications
+        for field in project.field_specifications.all():
+            project_data['field_specifications'].append({
+                'field_name': field.field_name,
+                'field_type': field.field_type,
+                'description': field.description
+            })
         
-        # Update log
-        result.log_output += "Script file created successfully.\n"
-        result.log_output += "Analyzing dependencies...\n"
-        result.save()
+        # Define log callback function to update logs in real-time
+        def log_callback(message):
+            update_log(result.id, message)
         
-        # Simulate containerization process
-        time.sleep(2)
-        
-        # Update log
-        result.log_output += "Dependencies identified: requests, beautifulsoup4, pandas\n"
-        result.log_output += "Creating Containerfile...\n"
-        result.save()
-        
-        # Simulate more processing
-        time.sleep(2)
-        
-        # Update log with container file content
-        container_file = f"""FROM python:3.9
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY scraper_{project.id}.py .
-CMD ["python", "scraper_{project.id}.py"]"""
-        
-        result.log_output += "Containerfile created:\n"
-        result.log_output += container_file + "\n\n"
-        result.log_output += "Building container image...\n"
-        result.save()
-        
-        # Simulate building container
-        time.sleep(3)
-        
-        # Update log
-        result.log_output += "Container built successfully.\n"
-        result.log_output += "Container image tag: scraper-" + str(project.id) + "\n"
-        result.log_output += "Ready for download or execution.\n"
-        
-        # Set example result data
-        sample_data = [
-            {"text": "Home", "url": "/"},
-            {"text": "About", "url": "/about"},
-            {"text": "Contact", "url": "/contact"}
-        ]
-        
-        if project.output_format == 'json':
-            result.result_data = json.dumps(sample_data, indent=2)
-        else:
-            # Convert to CSV format as a string
-            csv_data = "text,url\n"
-            for item in sample_data:
-                csv_data += f"{item['text']},{item['url']}\n"
-            result.result_data = csv_data
-        
-        result.status = 'completed'
+        # Generate script using LLM
+        try:
+            script_content = generate_script_with_llm(project_data, api_key, log_callback)
+            
+            # Write script to file
+            with open(script_path, 'w') as f:
+                f.write(script_content)
+            
+            update_log(result.id, "Script generated successfully.\nStarting containerization process...\n")
+            
+            # Containerize the script
+            containerization_result = containerize_script(script_path)
+            
+            if containerization_result.get('success', False):
+                update_log(result.id, f"Containerization successful. Container image: {containerization_result.get('image_name')}\n")
+                result.result_data = script_content
+                result.status = 'completed'
+            else:
+                error_message = containerization_result.get('error', 'Unknown error during containerization')
+                update_log(result.id, f"Containerization failed: {error_message}\n")
+                result.status = 'failed'
+            
+        except Exception as e:
+            update_log(result.id, f"Error during script generation: {str(e)}\n")
+            result.status = 'failed'
+            
         result.save()
         
     except Exception as e:
-        # Handle errors
-        result.log_output += f"Error: {str(e)}\n"
+        update_log(result.id, f"Unexpected error: {str(e)}\n")
         result.status = 'failed'
         result.save()
