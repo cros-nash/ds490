@@ -15,7 +15,7 @@ import subprocess
 import threading
 import time
 import sys
-
+import zipfile
 
 from .script_generator import dynamic_model_from_fields, load_code_generator_graph
 from django.conf import settings
@@ -254,24 +254,18 @@ def download_container(request, result_id):
     try:
         # Containerize the script (if not already containerized)
         container_result = containerize_script(script_path, temp_dir)
-        
         if not container_result.get('success', False):
             messages.error(request, 'Failed to package container files.')
             return redirect('project_detail', pk=result.project.id)
-        
-        # Create a zip file with all the container files
-        import zipfile
+        # create zip file with all the container files
         with zipfile.ZipFile(zip_path, 'w') as zipf:
-            # Add the Python script
-            zipf.write(script_path, os.path.basename(script_path))
-            # Add the Containerfile
-            containerfile_path = os.path.join(temp_dir, 'Containerfile')
+            zipf.write(script_path, os.path.basename(script_path)) # add generated script
+            containerfile_path = os.path.join(temp_dir, 'Containerfile') 
             if os.path.exists(containerfile_path):
-                zipf.write(containerfile_path, 'Containerfile')
-            # Add the requirements.txt
+                zipf.write(containerfile_path, 'Containerfile') # Add the Containerfile
             req_path = os.path.join(temp_dir, 'requirements.txt')
             if os.path.exists(req_path):
-                zipf.write(req_path, 'requirements.txt')
+                zipf.write(req_path, 'requirements.txt') # Add the requirements.txt
         with open(zip_path, 'rb') as f:
             response = HttpResponse(f.read(), content_type='application/zip')
             response['Content-Disposition'] = f'attachment; filename="{result.project.name}_container.zip"'
@@ -294,13 +288,11 @@ def update_log(result_id, message):
     except Exception as e:
         print(f"Error updating log: {e}")
 
-def containerize_script(
-        script_path, 
-        output_dir=None, image_name=None):
+def containerize_script(script_path, output_dir=None, image_name=None):
     """Wrapper for the Containerizer class"""
+    full_script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), f'../../{script_path}'))
     try:
-        containerizer = Containerizer(script_path, output_dir, image_name)
-        
+        containerizer = Containerizer(full_script_path, output_dir, image_name)
         if containerizer.containerize():
             print(f"\nContainerization complete. \nRun your container using:")
             print(f"docker run {containerizer.image_name}")
