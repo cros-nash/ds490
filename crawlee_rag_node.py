@@ -6,7 +6,7 @@ from typing import List, Optional
 
 from scrapegraphai.nodes.base_node import BaseNode
 
-from langchain_community.document_loaders import DirectoryLoader
+from langchain_community.document_loaders import DocusaurusLoader
 
 class RAGNode(BaseNode):
     """
@@ -62,27 +62,25 @@ class RAGNode(BaseNode):
         else:
             raise ValueError("client_type provided not correct")
         
-        loader = DirectoryLoader("docs/crawlee", glob="**/*.mdx", show_progress=True)
+        loader = DocusaurusLoader("https://crawlee.dev/python/")
         all_docs = loader.load()
-        filtered_docs = []
+
+        api_docs = []
         for doc in all_docs:
-            src = None
-            if hasattr(doc, "source"):
-                src = doc.source
-            elif hasattr(doc, "metadata") and isinstance(doc.metadata, dict):
-                src = doc.metadata.get("source")
-            if isinstance(src, str) and src.endswith(".mdx"):
-                filtered_docs.append(doc)
-        docs = [doc.page_content if hasattr(doc, "page_content") else str(doc) for doc in filtered_docs]
+            src = getattr(doc, "source", None) or (doc.metadata.get("source") if hasattr(doc, "metadata") else None)
+            if isinstance(src, str) and src.startswith("https://crawlee.dev/python/api"):
+                content = getattr(doc, "page_content", None)
+                if content:
+                    api_docs.append(content)
         
         embedder = self.embedder_model
         if embedder is None:
             raise ValueError("No embedder_model provided for RAGNode.")
-        vectors = embedder.embed_documents(docs)
+        vectors = embedder.embed_documents(api_docs)
 
         points = [
             PointStruct(id=i, vector=vec, payload={"text": doc})
-            for i, (vec, doc) in enumerate(zip(vectors, docs), start=1)
+            for i, (vec, doc) in enumerate(zip(vectors, api_docs), start=1)
         ]
         collection_name = "vectorial_collection"
         
