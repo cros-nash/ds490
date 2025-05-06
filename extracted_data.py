@@ -1,8 +1,8 @@
 import asyncio
-
 from crawlee.crawlers import PlaywrightCrawler, PlaywrightCrawlingContext
-import itertools
-from bs4 import BeautifulSoup
+from lxml import html
+import json
+import os
 
 async def main() -> None:
     crawler = PlaywrightCrawler(
@@ -13,42 +13,52 @@ async def main() -> None:
     async def request_handler(context: PlaywrightCrawlingContext) -> None:
         context.log.info(f'Processing {context.request.url}')
         
-        content = await context.page.content()
-        document = BeautifulSoup(content, 'html.parser')
+        html_content = await context.page.content()
+        document = html.fromstring(html_content)
 
-        cycle = context.request.url.split('=')[-1]
-
-        tables = []
-        for election_group in document.select('.component-wrap:has(h2)'):
-            title = election_group.find('h2').text
+        cycles = document.xpath('//select[@class="js-customSelect"][1]/option')
+        cycle_values = [cycle.text for cycle in cycles]
+        
+        for cycle_value in cycle_values:
+            await context.page.select_option('//select[@class="js-customSelect"][1]', value=cycle_value)
+            await context.page.wait_for_timeout(1000)
             
-            for row in election_group.select('.DataTable-Partial tbody tr'):
-                cells = row.find_all('td')
-                party = cells[0].text
+            html_content = await context.page.content()
+            document = html.fromstring(html_content)
+            data_tables = document.xpath('//table[contains(@class, "DataTable-Partial")]')
+            tables_data = []
+
+            for table in data_tables:
+                title = table.xpath('./preceding-sibling::h2[1]/text()')[0].strip() if table.xpath('./preceding-sibling::h2[1]/text()') else ''
                 
-                tables.append({
-                    'title': title,
-                    'party': party,
-                    'cycle': cycle,
-                    'cands': cells[1].text,
-                    'total_raised': cells[2].text,
-                    'total_spent': cells[3].text,
-                    'total_cash': cells[4].text,
-                    'total_pacs': cells[5].text,
-                    'total_individuals': cells[6].text,
-                })
+                rows = table.xpath('.//tbody/tr')
+                
+                for row in rows:
+                    party = row.xpath('td[contains(@class, "color-category")]/text()')[0] if row.xpath('td[contains(@class, "color-category")]/text()') else ''
+                    cands = row.xpath('td[contains(@class, "number")][1]/text()')[0] if row.xpath('td[contains(@class, "number")][1]/text()') else ''
+                    total_raised = row.xpath('td[contains(@class, "number")][2]/text()')[0] if row.xpath('td[contains(@class, "number")][2]/text()') else ''
+                    total_spent = row.xpath('td[contains(@class, "number")][3]/text()')[0] if row.xpath('td[contains(@class, "number")][3]/text()') else ''
+                    total_cash = row.xpath('td[contains(@class, "number")][4]/text()')[0] if row.xpath('td[contains(@class, "number")][4]/text()') else ''
+                    total_pacs = row.xpath('td[contains(@class, "number")][5]/text()')[0] if row.xpath('td[contains(@class, "number")][5]/text()') else ''
+                    total_individuals = row.xpath('td[contains(@class, "number")][6]/text()')[0] if row.xpath('td[contains(@class, "number")][6]/text()') else ''
 
-        data = {'tables': tables}
-        
-        await context.push_data(data)
-        
-    start_url = "https://www.opensecrets.org/elections-overview"
-    cycle_options = [1990, 1992, 1994, 1996, 1998, 2000, 2002, 2004, 2006, 2008, 2010, 2012,
-                     2014, 2016, 2018, 2020, 2022, 2024]
-    
-    cycle_urls = [f"{start_url}?cycle={cycle}" for cycle in cycle_options]
+                    tables_data.append({
+                        "title": title,
+                        "party": party,
+                        "cycle": cycle_value,
+                        "cands": cands,
+                        "total_raised": total_raised,
+                        "total_spent": total_spent,
+                        "total_cash": total_cash,
+                        "total_pacs": total_pacs,
+                        "total_individuals": total_individuals
+                    })
 
-    await crawler.run(cycle_urls)
+            file_name = f"election_cycle_{cycle_value}.json"
+            with open(file_name, 'w') as f:
+                json.dump({"tables": tables_data}, f, indent=4)
+
+    await crawler.run(['https://www.opensecrets.org/elections-overview'])
 
 if __name__ == '__main__':
     asyncio.run(main())
