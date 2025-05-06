@@ -6,6 +6,7 @@
 <div class="row">
     <div class="col-md-12">
         <h1>{{ project.name }}</h1>
+        <a href="{% url 'home' %}" class="btn btn-secondary mb-3">Back to Home</a>
         
         <div class="card mb-4">
             <div class="card-header">
@@ -26,6 +27,38 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Field Specifications</h5>
+            </div>
+            <div class="card-body">
+                {% if field_specifications %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Field Name</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for field in field_specifications %}
+                                <tr>
+                                    <td>{{ field.field_name }}</td>
+                                    <td>{{ field.get_field_type_display }}</td>
+                                    <td>{{ field.description }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">No field specifications defined yet.</div>
+                {% endif %}
             </div>
         </div>
         
@@ -78,7 +111,7 @@
         </div>
         
         <div class="mb-4">
-            <a href="{% url 'generate_script' project.id %}" class="btn btn-primary">Generate Scraping Script</a>
+            <a href="{% url 'generate_script' project.id %}" class="btn btn-primary btn-lg">Generate Scraping Script</a>
         </div>
         
         <div class="card mb-4">
@@ -127,7 +160,6 @@
                 {% endif %}
             </div>
         </div>
-        <a href="{% url 'home' %}" class="btn btn-secondary mb-3">Back to Home</a>
     </div>
 </div>
 {% endblock %}

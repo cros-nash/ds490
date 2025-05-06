@@ -1,11 +1,12 @@
 {% extends 'scraper/base.html' %}
 {% load widget_tweaks %}
-{% block title %}Edit {{ project.name }} - Web Scraping Tool{% endblock %}
+{% block title %}Edit Project - Web Scraping Tool{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-12">
-        <h1>Edit Project</h1>
+        <h1>Edit Project: {{ project.name }}</h1>
+        <a href="{% url 'project_detail' project.id %}" class="btn btn-secondary mb-3">Back to Project</a>
         
         <form method="post">
             {% csrf_token %}
@@ -22,22 +23,96 @@
                                 {{ form.name.errors }}
                                 {{ form.name|add_class:"form-control" }}
                             </div>
-                            
                             <div class="mb-3">
                                 <label for="id_website" class="form-label">Website URL</label>
                                 {{ form.website.errors }}
                                 {{ form.website|add_class:"form-control" }}
-                                <div class="form-text">The website you want to scrape</div>
+                                <div class="form-text">Enter the URL for the website you want to scrape.</div>
                             </div>
-                            
                             <div class="mb-3">
                                 <label for="id_llm_input" class="form-label">LLM Instructions</label>
                                 {{ form.llm_input.errors }}
                                 {{ form.llm_input|add_class:"form-control" }}
-                                <div class="form-text">Describe what data you want to extract from the website</div>
+                                <div class="form-text">Brief description of what you want to extract from the website.</div>
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>Field Specifications</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Enter the fields you want to extract from the website.</p>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="field-specifications-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Field Name</th>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Existing fields -->
+                                        {% for field in field_specifications %}
+                                        <tr class="field-row">
+                                            <td>
+                                                <input type="text" name="field_name" class="form-control" value="{{ field.field_name }}">
+                                            </td>
+                                            <td>
+                                                <select name="field_type" class="form-select">
+                                                    <option value="str" {% if field.field_type == 'str' %}selected{% endif %}>String</option>
+                                                    <option value="int" {% if field.field_type == 'int' %}selected{% endif %}>Integer</option>
+                                                    <option value="float" {% if field.field_type == 'float' %}selected{% endif %}>Float</option>
+                                                    <option value="bool" {% if field.field_type == 'bool' %}selected{% endif %}>Boolean</option>
+                                                    <option value="date" {% if field.field_type == 'date' %}selected{% endif %}>Date</option>
+                                                    <option value="list" {% if field.field_type == 'list' %}selected{% endif %}>List</option>
+                                                    <option value="dict" {% if field.field_type == 'dict' %}selected{% endif %}>Dictionary</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="text" name="field_description" class="form-control" value="{{ field.description }}">
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-danger btn-sm remove-field" onclick="removeField(this)">Remove</button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        
+                                        <!-- Template row (hidden) for adding new fields -->
+                                        <tr id="field-row-template" class="field-row" style="display: none;">
+                                            <td>
+                                                <input type="text" name="field_name" class="form-control" placeholder="e.g., title, price, description">
+                                            </td>
+                                            <td>
+                                                <select name="field_type" class="form-select">
+                                                    <option value="str">String</option>
+                                                    <option value="int">Integer</option>
+                                                    <option value="float">Float</option>
+                                                    <option value="bool">Boolean</option>
+                                                    <option value="date">Date</option>
+                                                    <option value="list">List</option>
+                                                    <option value="dict">Dictionary</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="text" name="field_description" class="form-control" placeholder="Brief description of this field">
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-danger btn-sm remove-field" onclick="removeField(this)">Remove</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <button type="button" class="btn btn-success" id="add-field-btn">Add Another Field</button>
+                        </div>
+                    </div>
+                    
                     <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'project_detail' project.id %}'">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Changes</button>
                 </div>
@@ -101,8 +176,70 @@
                     </div>
                 </div>
             </div>
-            
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Setup the "Add Another Field" button functionality
+    document.getElementById('add-field-btn').addEventListener('click', function() {
+        addNewField();
+    });
+    
+    // Setup initial remove buttons
+    document.querySelectorAll('.remove-field').forEach(button => {
+        button.addEventListener('click', function() {
+            removeField(this);
+        });
+    });
+    
+    // Add at least one field row if none exist
+    if (document.querySelectorAll('#field-specifications-table tbody tr:not([id="field-row-template"]):not([style*="display: none"])').length === 0) {
+        addNewField();
+    }
+});
+
+function addNewField() {
+    const table = document.getElementById('field-specifications-table').getElementsByTagName('tbody')[0];
+    const templateRow = document.getElementById('field-row-template');
+    
+    // Clone the template row
+    const newRow = templateRow.cloneNode(true);
+    newRow.id = ''; // Remove the template id from the clone
+    newRow.style.display = ''; // Make it visible
+    
+    // Clear any values in the fields
+    newRow.querySelectorAll('input').forEach(input => {
+        input.value = '';
+    });
+    
+    // Reset any select elements
+    newRow.querySelectorAll('select').forEach(select => {
+        select.selectedIndex = 0;
+    });
+    
+    // Make sure remove button works for the new row
+    newRow.querySelector('.remove-field').addEventListener('click', function() {
+        removeField(this);
+    });
+    
+    // Add the new row to the table
+    table.appendChild(newRow);
+}
+
+function removeField(button) {
+    const row = button.closest('tr');
+    const tbody = row.parentNode;
+    
+    // Make sure we have at least one row
+    if (tbody.querySelectorAll('tr.field-row:not([id="field-row-template"]):not([style*="display: none"])').length > 1) {
+        tbody.removeChild(row);
+    } else {
+        alert('At least one field is required.');
+    }
+}
+</script>
 {% endblock %}

@@ -28,6 +28,27 @@ class Project(models.Model):
     def __str__(self):
         return self.name
 
+class FieldSpecification(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='field_specifications')
+    field_name = models.CharField(max_length=100)
+    field_type = models.CharField(max_length=20, choices=[
+        ('str', 'String'), 
+        ('int', 'Integer'), 
+        ('float', 'Float'),
+        ('bool', 'Boolean'),
+        ('date', 'Date'),
+        ('list', 'List'),
+        ('dict', 'Dictionary')
+    ], default='str')
+    description = models.TextField(blank=True)
+    order = models.IntegerField(default=0)  # To maintain field order
+    
+    class Meta:
+        ordering = ['order']
+    
+    def __str__(self):
+        return f"{self.field_name} ({self.field_type})"
+    
 class APIKey(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     key = models.CharField(max_length=255)

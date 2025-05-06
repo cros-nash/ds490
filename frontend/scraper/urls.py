@@ -16,6 +16,7 @@ urlpatterns = [
     path('projects/<int:pk>/edit/', views.edit_project, name='edit_project'),
     path('projects/<int:pk>/delete/', views.delete_project, name='delete_project'),
     path('projects/<int:pk>/generate/', views.generate_script, name='generate_script'),
+    path('field-specification/add/', views.add_field_specification, name='add_field_specification'),
     path('execution/<int:result_id>/', views.execution_status, name='execution_status'),
     path('results/<int:result_id>/', views.results_screen, name='results_screen'),
     path('api/logs/<int:result_id>/', views.get_logs, name='get_logs'),

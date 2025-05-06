@@ -5,8 +5,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
-from .models import Project, ScrapingResult, APIKey
-from .forms import ProjectForm, APIKeyForm, CustomUserCreationForm
+from .models import Project, ScrapingResult, APIKey, FieldSpecification
+from .forms import ProjectForm, APIKeyForm, CustomUserCreationForm, FieldSpecificationForm
 import json
 import os
 import tempfile
@@ -70,27 +70,60 @@ def create_project(request):
             project = form.save(commit=False)
             project.user = request.user
             project.save()
+            field_names = request.POST.getlist('field_name')
+            field_types = request.POST.getlist('field_type')
+            field_descriptions = request.POST.getlist('field_description')
+            for i in range(len(field_names)):
+                if field_names[i].strip():  # Only create if field name is not empty
+                    FieldSpecification.objects.create(
+                        project=project,
+                        field_name=field_names[i],
+                        field_type=field_types[i],
+                        description=field_descriptions[i],
+                        order=i
+                    )
             messages.success(request, f'Project "{project.name}" created successfully.')
             return redirect('project_detail', pk=project.id)
     else:
         form = ProjectForm()
-        
-    return render(request, 'scraper/create_project.html', {'form': form})
+        field_form = FieldSpecificationForm()
+    return render(request, 'scraper/create_project.html', {
+        'form': form,
+        'field_form': field_form
+        })
 
 @login_required
 def edit_project(request, pk):
     project = get_object_or_404(Project, pk=pk, user=request.user)
-    
+    field_specifications = project.field_specifications.all()
+
     if request.method == 'POST':
         form = ProjectForm(request.POST, instance=project)
         if form.is_valid():
             form.save()
+            project.field_specifications.all().delete()
+            field_names = request.POST.getlist('field_name')
+            field_types = request.POST.getlist('field_type')
+            field_descriptions = request.POST.getlist('field_description')
+            for i in range(len(field_names)):
+                if field_names[i].strip():  # Only create if field name is not empty
+                    FieldSpecification.objects.create(
+                        project=project,
+                        field_name=field_names[i],
+                        field_type=field_types[i],
+                        description=field_descriptions[i],
+                        order=i
+                    )
             messages.success(request, f'Project "{project.name}" updated successfully.')
             return redirect('project_detail', pk=project.id)
     else:
         form = ProjectForm(instance=project)
         
-    return render(request, 'scraper/edit_project.html', {'form': form, 'project': project})
+    return render(request, 'scraper/edit_project.html', {
+        'form': form, 
+        'project': project,
+        'field_specifications': field_specifications
+        })
 
 @login_required
 def delete_project(request, pk):
@@ -108,39 +141,50 @@ def delete_project(request, pk):
 def project_detail(request, pk):
     project = get_object_or_404(Project, pk=pk, user=request.user)
     results = ScrapingResult.objects.filter(project=project).order_by('-created_at')
-    
+    field_specifications = project.field_specifications.all()
+
     return render(request, 'scraper/project_detail.html', {
         'project': project,
-        'results': results
+        'results': results,
+        'field_specifications': field_specifications
     })
+
+@login_required
+def add_field_specification(request):
+    """AJAX endpoint to add a new field specification row"""
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        field_form = FieldSpecificationForm(data)
+        if field_form.is_valid():
+            # We don't save it here, just return the HTML for a new empty row
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'errors': field_form.errors})
+    return JsonResponse({'success': False, 'message': 'Invalid request'})
+
 
 @login_required
 def generate_script(request, pk):
     project = get_object_or_404(Project, pk=pk, user=request.user)
-    
     # Create script template based on project settings
     script_content = generate_python_script(project)
-    
     # Create a new result
     result = ScrapingResult.objects.create(
         project=project,
         status='running',
         log_output='Initializing...\n'
     )
-    
     # Start the script generation and containerization in a separate thread
     thread = threading.Thread(
         target=process_script_generation,
         args=(result, script_content, project)
     )
     thread.start()
-    
     return redirect('execution_status', result_id=result.id)
 
 @login_required
 def execution_status(request, result_id):
     result = get_object_or_404(ScrapingResult, pk=result_id, project__user=request.user)
-    
     return render(request, 'scraper/execution_status.html', {'result': result})
 
 @login_required
@@ -186,7 +230,16 @@ def download_container(request, result_id):
 
 # helper functions
 def generate_python_script(project):
+
+    schema = {}
+    for field in project.field_specifications.all():
+        schema[field.field_name] = {
+            "type": field.field_type,
+            "description": field.description
+        }
+    
     # TODO: return scrapegraph script
+
     return NotImplemented
 
 def process_script_generation(result, script_content, project):

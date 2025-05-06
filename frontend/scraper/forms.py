@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Project, APIKey
+from .models import Project, APIKey, FieldSpecification
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -27,4 +27,14 @@ class ProjectForm(forms.ModelForm # creates form based on a model
                   'download_html', 'screenshot', 'output_format']
         widgets = {
             'llm_input': forms.Textarea(attrs={'rows': 5}),
+        }
+
+class FieldSpecificationForm(forms.ModelForm):
+    class Meta:
+        model = FieldSpecification
+        fields = ['field_name', 'field_type', 'description']
+        widgets = {
+            'field_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'field_type': forms.Select(attrs={'class': 'form-select'}),
+            'description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Brief description of the field'}),
         }
