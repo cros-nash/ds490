@@ -230,20 +230,52 @@ def get_logs(request, result_id):
 
 @login_required
 def download_container(request, result_id):
-    result = get_object_or_404(ScrapingResult, pk=result_id, project__user=request.user)
-    
+    result = get_object_or_404(ScrapingResult, pk=result_id, project__user=request.user
     # Check if we have a containerized script
     if not result.status == 'completed':
         messages.error(request, 'Container is not ready for download yet.')
         return redirect('execution_status', result_id=result.id)
     
-    # In a real implementation, we would create a downloadable Docker image
-    # For now, we'll just return the script as a downloadable file
-    response = HttpResponse(content_type='text/plain')
-    response['Content-Disposition'] = f'attachment; filename="scraper_{result.project.id}.py"'
-    response.write(result.result_data)
+    temp_dir = tempfile.mkdtemp()
+    script_path = os.path.join(temp_dir, f'scraper_{result.project.id}.py')
+
+    with open(script_path, 'w') as f:
+        f.write(result.result_data)
     
-    return response
+    zip_path = os.path.join(temp_dir, 'container_package.zip')
+    try:
+        # Containerize the script (if not already containerized)
+        container_result = containerize_script(script_path, temp_dir)
+        
+        if not container_result.get('success', False):
+            messages.error(request, 'Failed to package container files.')
+            return redirect('project_detail', pk=result.project.id)
+        
+        # Create a zip file with all the container files
+        import zipfile
+        with zipfile.ZipFile(zip_path, 'w') as zipf:
+            # Add the Python script
+            zipf.write(script_path, os.path.basename(script_path))
+            # Add the Containerfile
+            containerfile_path = os.path.join(temp_dir, 'Containerfile')
+            if os.path.exists(containerfile_path):
+                zipf.write(containerfile_path, 'Containerfile')
+            # Add the requirements.txt
+            req_path = os.path.join(temp_dir, 'requirements.txt')
+            if os.path.exists(req_path):
+                zipf.write(req_path, 'requirements.txt')
+        with open(zip_path, 'rb') as f:
+            response = HttpResponse(f.read(), content_type='application/zip')
+            response['Content-Disposition'] = f'attachment; filename="{result.project.name}_container.zip"'
+            return response
+    except Exception as e:
+        messages.error(request, f'Error packaging container: {str(e)}')
+        return redirect('project_detail', pk=result.project.id)
+    finally:
+        # Clean up temporary directory
+        import shutil
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
 
 def update_log(result_id, message):
     """Update the log output for a result"""
