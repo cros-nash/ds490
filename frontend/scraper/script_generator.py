@@ -7,15 +7,20 @@ from typing import Dict, Any, List, Callable
 from pydantic import BaseModel, Field, create_model
 
 def load_code_generator_graph():
-    """Dynamically load CodeGeneratorGraph from project root"""
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    """Dynamically load CodeGeneratorGraph from repository root"""
+    # Determine repository root (three levels up from this file: scraper -> frontend -> repo)
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     module_path = os.path.join(project_root, 'code_generator_graph.py')
     
     if not os.path.exists(module_path):
         raise FileNotFoundError(f"Could not find code_generator_graph.py at {module_path}")
     
+    # Ensure repository root is on sys.path so that code_generator_graph imports its local modules
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
     spec = importlib.util.spec_from_file_location("code_generator_graph", module_path)
     module = importlib.util.module_from_spec(spec)
+    # Execute module to load CodeGeneratorGraph and its dependencies
     spec.loader.exec_module(module)
     
     return module.CodeGeneratorGraph
