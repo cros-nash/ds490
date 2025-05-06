@@ -28,7 +28,7 @@ cd ds490/main
 ```
 ### 2. Install Dependencies
 ```bash
-pip install -r requirements.txt
+pip install -e .
 ```
 ### 3. Configure Environment Variables
 Create a  `.env` file and add your OpenAI API key:
