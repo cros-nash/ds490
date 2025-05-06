@@ -221,7 +221,6 @@ class CodeGeneratorGraph(AbstractGraph):
 
         if use_cache:
             # Load cached state (excluding vector DB) and rehydrate
-            print("CACHE IS BEING USED :)")
             with open(cache_file, "r") as f:
                 cached = json.load(f)
             original_html = [
@@ -246,7 +245,6 @@ class CodeGeneratorGraph(AbstractGraph):
 
         else:
             # First run: execute all upstream nodes and cache intermediate results
-            print("CACHE IS BEING CREATED")
             state = {"user_prompt": self.prompt, self.input_key: self.source}
             upstream_nodes = self.graph.nodes[:-1]
             for node in upstream_nodes:

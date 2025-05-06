@@ -97,18 +97,18 @@
         fetch('{% url "get_logs" result.id %}')
             .then(response => response.json())
             .then(data => {
+                // Always update script preview from the generated script if provided
+                if (typeof data.script !== 'undefined' && data.script) {
+                    scriptPreview.textContent = data.script;
+                }
                 // Check if there are new log entries
                 if (data.log.length > lastLogLength) {
                     logOutput.textContent = data.log;
                     lastLogLength = data.log.length;
-                    
                     // Auto scroll to bottom if enabled
                     if (autoScroll) {
                         logOutput.scrollTop = logOutput.scrollHeight;
                     }
-                    
-                    // Update script preview from logs if possible
-                    updateScriptPreview(data.log);
                 }
                 
                 // Update progress based on log content and status

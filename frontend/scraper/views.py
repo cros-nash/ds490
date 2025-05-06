@@ -18,6 +18,7 @@ import sys
 
 
 from .script_generator import dynamic_model_from_fields, load_code_generator_graph
+from django.conf import settings
 import io, contextlib
 from pydantic import create_model
 from typing import List
@@ -224,9 +225,16 @@ def results_screen(request, result_id):
     })
 
 @login_required
+@login_required
 def get_logs(request, result_id):
+    """Return the current log and status, plus the generated script if available."""
     result = get_object_or_404(ScrapingResult, pk=result_id, project__user=request.user)
-    return JsonResponse({'log': result.log_output, 'status': result.status})
+    data = {
+        'log': result.log_output,
+        'status': result.status,
+        'script': result.result_data or ''
+    }
+    return JsonResponse(data)
 
 @login_required
 def download_container(request, result_id):
@@ -313,7 +321,7 @@ def containerize_script(
             'error': str(e)
         }
 
-def generate_python_script(project):
+def generate_python_script_template(project):
     """
     Generate a Python script that uses CodeGeneratorGraph to produce
     scraping code based on project settings and field specifications.
@@ -347,7 +355,15 @@ def generate_python_script(project):
     for fs in specs:
         pytype = type_map.get(fs.field_type, "str")
         desc = fs.description.replace("'", "\\'")
-        record_fields.append(f"    {fs.field_name}: {pytype} = Field(..., description='{desc}')")
+        INDENT = " " * 4
+        clean_name = fs.field_name.strip()
+        clean_desc = fs.description.replace("'", "\\'").replace("\n", " ").replace("\r", "").strip()
+        record_fields.append(f"{INDENT}{clean_name}: {pytype} = Field(..., description='{clean_desc}')")
+        
+    for line in record_fields:
+        print(repr(line))
+
+
     if not record_fields:
         record_fields = ["    pass"]
 
@@ -358,19 +374,21 @@ os.environ["OPENAI_API_KEY"] = "{api_key}"
 from pydantic import BaseModel, Field
 from typing import List{", Any" if needs_any else ""}
 {"import datetime" if needs_datetime else ""}
-from code_generator_graph import CodeGeneratorGraph
+from graphs.code_generator_graph import CodeGeneratorGraph
 
 graph_config = {{
 "llm": {{
     "api_key": os.getenv("OPENAI_API_KEY"),
     "model": "openai/gpt-4o-mini"
 }},
-"verbose": {project.verbose_logging},
-"headless": False
+"verbose": {bool(project.verbose_logging)},
+"headless": False,
+"output_file_name": "extracted_data.py",
+"force": {True},
 }}  
 
 class Record(BaseModel):
-    {chr(10).join(record_fields)}
+{chr(10).join(record_fields)}
 
 class RecordList(BaseModel):
     records: List[Record]
@@ -385,35 +403,89 @@ if __name__ == "__main__":
 result = graph.run()
 print(result)
 '''
+    print(template)
     return template
 
 def process_script_generation(result, project, api_key):
-    """Run the CodeGeneratorGraph test script via subprocess and capture output"""
-    # Determine repository root (three levels up: scraper -> frontend -> repo root)
-    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    # Path to the test script that exercises CodeGeneratorGraph
-    test_script = project_root+"/tests/test.py"
-    update_log(result.id, "Starting CodeGeneratorGraph test via subprocess...\n")
+    """
+    Generate a Python scraping script for the project, store it in the result,
+    and update the log and status.
+    """
+    # Ensure fresh database connection for this background thread
     try:
-        # Execute the test.py script in the project root
-        proc = subprocess.Popen(
-            [sys.executable, test_script],
-            cwd=project_root,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1
-        )
-        
-        for line in proc.stdout:
-            update_log(result.id, line)
+        from django.db import close_old_connections
+        close_old_connections()
+    except Exception:
+        # Could not reset DB connections; continue anyway
+        pass
+    update_log(result.id, "Generating Python script based on project specifications...\n")
 
-        # Save result data as stdout
-        result.result_data = proc.stdout
-        # Determine status
-        result.status = 'completed' if proc.returncode == 0 else 'failed'
-        result.save()
+    try:
+        script_content = generate_python_script_template(project)
+        update_log(result.id, "Script generated successfully.\n")
     except Exception as e:
-        update_log(result.id, f"Subprocess error during graph test: {e}\n")
+        update_log(result.id, f"Error generating script: {e}\n")
         result.status = 'failed'
         result.save()
+        return
+    
+    update_log(result.id, "Writing script to temporary file and executing...\n")
+    # Determine the repository root (parent of BASE_DIR)
+    from pathlib import Path
+    project_root = Path(settings.BASE_DIR).parent
+    
+    # Write script to a temporary file and execute it unbuffered
+    tmp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False)
+    try:
+        tmp_file.write(script_content)
+        tmp_file.flush()
+        tmp_file.close()
+        # Run the script with unbuffered output
+        cmd = [sys.executable, '-u', tmp_file.name]
+        update_log(result.id, f"Executing command: {' '.join(cmd)}\n")
+        update_log(result.id, f"Working dir: {project_root}\n")
+        try:
+            proc = subprocess.Popen(
+                cmd,
+                cwd=str(project_root),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1
+            )
+            update_log(result.id, f"Subprocess started with PID {proc.pid}\n")
+            try:
+                for line in proc.stdout:
+                    line = proc.stdout.readline()
+                    update_log(result.id, line)
+                exit_code = proc.wait(timeout=60)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                update_log(result.id, f"Subprocess exited \n")
+        except Exception as e:
+            update_log(result.id, f"Subprocess error: {e}\n")
+            exit_code = -1
+    finally:
+        # Clean up the temporary script file
+        try:
+            os.remove(tmp_file.name)
+        except OSError:
+            pass
+         
+    update_log(result.id, f"Script execution completed with exit code {exit_code}.\n")
+    if exit_code == 0:
+        output_file = os.path.join(project_root, "extracted_data.py")
+        try:
+            with open(output_file, 'r') as f:
+                generated_data = f.read()
+            update_log(result.id, "Generated data file read successfully.\n")
+            result.result_data = generated_data
+            result.status = 'completed'
+        except Exception as e:
+            update_log(result.id, f"Error reading generated file: {e}\n")
+            result.result_data = ''
+            result.status = 'failed'
+    else:
+        result.result_data = ''
+        result.status = 'failed'
+    result.save()
