@@ -10,7 +10,7 @@ Outputs:
 
 This will also build the container image.
 """
-
+from typing import Type
 import argparse
 import sys
 import os
@@ -20,7 +20,7 @@ from pathlib import Path
 from importlib.metadata import distributions
 import pkg_resources
 
-
+ContainerizerType = Type["Containerizer"]
 class Containerizer:
     
     def __init__(self, 
