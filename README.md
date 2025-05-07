@@ -24,17 +24,55 @@ This tool simplifies web scraping by allowing users to provide a prompt, URL, an
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/cros-nash/ds490.git
-cd ds490/main
 ```
-### 2. Install Dependencies
+
+### 2. Create and activate a virtual environment + Install Dependencies
 ```bash
+python -m venv mvenv
+source myenv/bin/activate
+cd ds490
 pip install -e .
 ```
 ### 3. Configure Environment Variables
-Create a  `.env` file and add your OpenAI API key:
+Create a `.env` file and add your OpenAI API key:
 ```bash
 OPENAI_API_KEY=your_api_key_here
 ```
+
+### 4. Create database:
+```
+   python frontend/manage.py makemigrations
+   python frontend/manage.py migrate
+```
+
+### 5. Create a superuser (admin account):
+   ```
+   python frontend/manage.py createsuperuser
+   ```
+   Follow the prompts to set username, email, and password.
+
+## Accessing Web App:
+1. Run the development server:
+   ```
+   python frontend/manage.py runserver
+   ```
+
+2. To access application, enter in browser: http://127.0.0.1:8000/
+
+3. Login with superuser credentials
+
+4. Set API key
+
+5. Create project
+
+### Working Example:
+* name of project: test 3
+* website url: https://crawlee.dev/python/docs/examples
+* prompt="Please give me the name, description, and URL for examples of crawlee applications that involve pagination"
+* fields:
+    * name: str = Name of the example
+    * description: str = One sentence description of the example
+    * url: str = description="URL of the example
 
 ## Technical Stack
 ### Core Language: Python 3.10+
