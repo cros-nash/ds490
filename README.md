@@ -6,11 +6,11 @@
 This tool simplifies web scraping by allowing users to provide a prompt, URL, and desired of a website and automatically generating a **Python script** to extract the desired data. It combines **LLM (Large Language Model) analysis**, **containerized execution**, and **user-friendly input** to make scraping accessible without requiring coding expertise.
 
 ### Key Features
-✅ **No-Code Scraping** – Generate scraping scripts just by providing a URL and prompt.  
-✅ **LLM-Powered Parsing** – Uses AI to intelligently identify and extract structured data.  
-✅ **Dockerized Environment** – Ensures consistent execution across different systems.  
-✅ **Customizable Output** – Supports CSV, JSON, or direct database storage.  
-✅ **User-Friendly CLI** – Simple commands to run and configure scrapers.  
+* **No-Code Scraping** – Generate scraping scripts just by providing a URL and prompt.  
+* **LLM-Powered Parsing** – Uses AI to intelligently identify and extract structured data.  
+* **Dockerized Environment** – Ensures consistent execution across different systems.  
+* **Customizable Output** – Supports CSV, JSON, or direct database storage.  
+* **User-Friendly CLI** – Simple commands to run and configure scrapers.  
 
 ---
 
