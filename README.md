@@ -32,6 +32,7 @@ python -m venv mvenv
 source myenv/bin/activate
 cd ds490
 pip install -e .
+playwright install
 ```
 ### 3. Configure Environment Variables
 Create a `.env` file and add your OpenAI API key:
