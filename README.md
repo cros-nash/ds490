@@ -73,7 +73,7 @@ OPENAI_API_KEY=your_api_key_here
 * fields:
     * name: str = Name of the example
     * description: str = One sentence description of the example
-    * url: str = description="URL of the example
+    * url: str = URL of the example
 
 ## Technical Stack
 ### Core Language: Python 3.10+
